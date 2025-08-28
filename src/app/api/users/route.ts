@@ -34,7 +34,13 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             dateOfBirth: true,
+            emergencyContact: true,
+            insuranceType: true,
             insuranceProvider: true,
+            insurancePolicyNumber: true,
+            insuranceGroupNumber: true,
+            allergies: true,
+            medications: true,
           },
         },
         provider: {

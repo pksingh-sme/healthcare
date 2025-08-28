@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
         data: { profileImage: imageUrl }
       })
       
+      return NextResponse.json({
         id: updatedUser.id,
         email: updatedUser.email,
         profileImage: updatedUser.profileImage

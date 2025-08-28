@@ -4,400 +4,324 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('Starting database seed...')
+  // Clear existing data
+  await prisma.notification.deleteMany()
+  await prisma.sharedMedicalRecord.deleteMany()
+  await prisma.session.deleteMany()
+  await prisma.message.deleteMany()
+  await prisma.billing.deleteMany()
+  await prisma.medicalRecord.deleteMany()
+  await prisma.appointment.deleteMany()
+  await prisma.provider.deleteMany()
+  await prisma.patient.deleteMany()
+  await prisma.user.deleteMany()
+  await prisma.demoRequest.deleteMany()
+
+  console.log('Existing data cleared')
 
   // Create admin user
-  const adminPassword = await bcrypt.hash('admin123!', 12)
-  
-  const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@clinicease.ai' },
-    update: {},
-    create: {
+  const adminPassword = await bcrypt.hash('admin123', 12)
+  const admin = await prisma.user.create({
+    data: {
       email: 'admin@clinicease.ai',
       password: adminPassword,
-      firstName: 'System',
-      lastName: 'Administrator',
       role: Role.ADMIN,
-      phone: '+1-555-0001',
+      firstName: 'Admin',
+      lastName: 'User',
+      phone: '+1234567890',
+      isActive: true,
       twoFAEnabled: false,
     },
   })
 
-  console.log('Created admin user:', adminUser.email)
+  console.log('Admin user created')
 
-  // Create sample provider
-  const providerPassword = await bcrypt.hash('provider123!', 12)
-  
-  const providerUser = await prisma.user.upsert({
-    where: { email: 'dr.smith@clinicease.ai' },
-    update: {},
-    create: {
-      email: 'dr.smith@clinicease.ai',
-      password: providerPassword,
-      firstName: 'Sarah',
-      lastName: 'Smith',
-      role: Role.PROVIDER,
-      phone: '+1-555-0002',
-      twoFAEnabled: false,
-    },
-  })
+  // Create provider users (10 records)
+  const providers = []
+  const providerPasswords = await Promise.all(
+    Array.from({ length: 10 }, (_, i) => bcrypt.hash('provider123', 12))
+  )
 
-  const provider = await prisma.provider.upsert({
-    where: { userId: providerUser.id },
-    update: {},
-    create: {
-      userId: providerUser.id,
-      licenseNumber: 'MD123456',
-      specialty: 'Internal Medicine',
-      department: 'Primary Care',
-    },
-  })
-
-  console.log('Created provider:', providerUser.email)
-
-  // Create sample patient
-  const patientPassword = await bcrypt.hash('patient123!', 12)
-  
-  const patientUser = await prisma.user.upsert({
-    where: { email: 'john.doe@example.com' },
-    update: {},
-    create: {
-      email: 'john.doe@example.com',
-      password: patientPassword,
-      firstName: 'John',
-      lastName: 'Doe',
-      role: Role.PATIENT,
-      phone: '+1-555-0003',
-      twoFAEnabled: false,
-    },
-  })
-
-  const patient = await prisma.patient.upsert({
-    where: { userId: patientUser.id },
-    update: {},
-    create: {
-      userId: patientUser.id,
-      dateOfBirth: new Date('1990-01-15'),
-      emergencyContact: 'Jane Doe - +1-555-0004',
-      insuranceProvider: 'Blue Cross Blue Shield',
-    },
-  })
-
-  console.log('Created patient:', patientUser.email)
-
-  // Create additional test patients
-  const additionalPatients = [
-    {
-      email: 'jane.smith@example.com',
-      firstName: 'Jane',
-      lastName: 'Smith',
-      phone: '+1-555-0005',
-      dateOfBirth: new Date('1985-08-22'),
-      emergencyContact: 'Robert Smith - +1-555-0006',
-      insuranceProvider: 'Aetna',
-    },
-    {
-      email: 'mike.johnson@example.com',
-      firstName: 'Mike',
-      lastName: 'Johnson',
-      phone: '+1-555-0007',
-      dateOfBirth: new Date('1978-12-10'),
-      emergencyContact: 'Sarah Johnson - +1-555-0008',
-      insuranceProvider: 'United Healthcare',
-    },
-    {
-      email: 'lisa.brown@example.com',
-      firstName: 'Lisa',
-      lastName: 'Brown',
-      phone: '+1-555-0009',
-      dateOfBirth: new Date('1992-05-18'),
-      emergencyContact: 'David Brown - +1-555-0010',
-      insuranceProvider: 'Cigna',
-    },
-  ]
-
-  const createdPatients = [patient]
-
-  // Create additional patients
-  for (const patientData of additionalPatients) {
-    const patientPassword = await bcrypt.hash('patient123!', 12)
-    
-    const patientUser = await prisma.user.upsert({
-      where: { email: patientData.email },
-      update: {},
-      create: {
-        email: patientData.email,
-        password: patientPassword,
-        firstName: patientData.firstName,
-        lastName: patientData.lastName,
-        role: Role.PATIENT,
-        phone: patientData.phone,
+  for (let i = 0; i < 10; i++) {
+    const providerUser = await prisma.user.create({
+      data: {
+        email: `provider${i + 1}@clinicease.ai`,
+        password: providerPasswords[i],
+        role: Role.PROVIDER,
+        firstName: `Provider${i + 1}`,
+        lastName: 'User',
+        phone: `+12345678${i.toString().padStart(2, '0')}`,
+        isActive: true,
         twoFAEnabled: false,
       },
     })
 
-    const newPatient = await prisma.patient.upsert({
-      where: { userId: patientUser.id },
-      update: {},
-      create: {
-        userId: patientUser.id,
-        dateOfBirth: patientData.dateOfBirth,
-        emergencyContact: patientData.emergencyContact,
-        insuranceProvider: patientData.insuranceProvider,
+    const provider = await prisma.provider.create({
+      data: {
+        userId: providerUser.id,
+        title: i % 2 === 0 ? 'Dr.' : 'Nurse',
+        specialty: ['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics', 'Dermatology'][i % 5],
+        licenseNumber: `LIC${(1000 + i).toString()}`,
+        department: ['Emergency', 'Surgery', 'ICU', 'Outpatient', 'Radiology'][i % 5],
       },
     })
 
-    createdPatients.push(newPatient)
-    console.log('Created additional patient:', patientUser.email)
+    providers.push({ user: providerUser, provider })
   }
 
-  // Create additional provider (Nurse)
-  const nursePassword = await bcrypt.hash('nurse123!', 12)
-  
-  const nurseUser = await prisma.user.upsert({
-    where: { email: 'nurse.emily@clinicease.ai' },
-    update: {},
-    create: {
-      email: 'nurse.emily@clinicease.ai',
-      password: nursePassword,
-      firstName: 'Emily',
-      lastName: 'Davis',
-      role: Role.PROVIDER,
-      phone: '+1-555-0011',
-      twoFAEnabled: false,
-    },
-  })
+  console.log('Provider users created')
 
-  const nurse = await prisma.provider.upsert({
-    where: { userId: nurseUser.id },
-    update: {},
-    create: {
-      userId: nurseUser.id,
-      licenseNumber: 'RN789012',
-      specialty: 'Registered Nurse',
-      department: 'Primary Care',
-    },
-  })
+  // Create patient users (50 records)
+  const patients = []
+  const patientPasswords = await Promise.all(
+    Array.from({ length: 50 }, (_, i) => bcrypt.hash('patient123', 12))
+  )
 
-  console.log('Created nurse provider:', nurseUser.email)
+  for (let i = 0; i < 50; i++) {
+    const patientUser = await prisma.user.create({
+      data: {
+        email: `patient${i + 1}@clinicease.ai`,
+        password: patientPasswords[i],
+        role: Role.PATIENT,
+        firstName: `Patient${i + 1}`,
+        lastName: 'User',
+        phone: `+19876543${i.toString().padStart(2, '0')}`,
+        isActive: true,
+        twoFAEnabled: false,
+      },
+    })
 
-  // Create sample appointment
-  const appointment = await prisma.appointment.create({
-    data: {
-      title: 'Annual Physical Exam',
-      description: 'Routine annual physical examination',
-      startTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-      endTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 60 * 60 * 1000), // 1 hour duration
-      patientId: patient.id,
-      providerId: provider.id,
-      createdById: adminUser.id,
-      status: 'CONFIRMED',
-      type: 'routine',
-      noShowProbability: 0.15,
-    },
-  })
+    const patient = await prisma.patient.create({
+      data: {
+        userId: patientUser.id,
+        dateOfBirth: new Date(1980 + (i % 40), i % 12, (i % 28) + 1),
+        gender: i % 2 === 0 ? 'Male' : 'Female',
+        address: `${100 + i} Main St`,
+        city: 'New York',
+        state: 'NY',
+        zipCode: `100${i.toString().padStart(2, '0')}`,
+        emergencyContact: `Emergency Contact ${i + 1}`,
+        emergencyPhone: `+1555${i.toString().padStart(4, '0')}`,
+        insuranceType: 'PRIVATE',
+        insuranceProvider: 'Blue Cross Blue Shield',
+        insurancePolicyNumber: `POL${(10000 + i).toString()}`,
+        insuranceGroupNumber: `GRP${(1000 + i).toString()}`,
+        allergies: i % 3 === 0 ? 'Penicillin' : i % 3 === 1 ? 'Shellfish' : null,
+        medications: i % 4 === 0 ? 'Lisinopril' : i % 4 === 1 ? 'Metformin' : i % 4 === 2 ? 'Atorvastatin' : null,
+      },
+    })
 
-  console.log('Created sample appointment:', appointment.id)
+    patients.push({ user: patientUser, patient })
+  }
 
-  // Create multiple appointments with different statuses
-  const appointmentData = [
-    {
-      title: 'Follow-up Consultation',
-      description: 'Follow-up for previous visit',
-      startTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-      endTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 30 * 60 * 1000),
-      status: 'CONFIRMED',
-      type: 'follow-up',
-    },
-    {
-      title: 'Vaccination Appointment',
-      description: 'Annual flu vaccination',
-      startTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-      endTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000 + 15 * 60 * 1000),
-      status: 'SCHEDULED',
-      type: 'vaccination',
-    },
-    {
-      title: 'Emergency Visit',
-      description: 'Urgent care visit',
-      startTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-      endTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000 + 45 * 60 * 1000),
-      status: 'COMPLETED',
-      type: 'emergency',
-    },
-  ]
+  console.log('Patient users created')
 
-  // Create additional appointments
-  for (let i = 0; i < appointmentData.length; i++) {
-    const appointmentInfo = appointmentData[i]
-    const targetPatient = createdPatients[i % createdPatients.length]
-    const targetProvider = Math.random() > 0.5 ? provider : nurse
+  // Create appointments (30 records)
+  const appointmentStatuses = ['SCHEDULED', 'CONFIRMED', 'CANCELLED', 'COMPLETED', 'NO_SHOW']
+  const appointmentTypes = ['Checkup', 'Consultation', 'Follow-up', 'Procedure', 'Emergency']
+
+  for (let i = 0; i < 30; i++) {
+    const patient = patients[i % patients.length]
+    const provider = providers[i % providers.length]
+    
+    const startTime = new Date()
+    startTime.setDate(startTime.getDate() + i)
+    startTime.setHours(9 + (i % 8), 0, 0, 0)
+    
+    const endTime = new Date(startTime)
+    endTime.setHours(startTime.getHours() + 1)
 
     await prisma.appointment.create({
       data: {
-        title: appointmentInfo.title,
-        description: appointmentInfo.description,
-        startTime: appointmentInfo.startTime,
-        endTime: appointmentInfo.endTime,
-        patientId: targetPatient.id,
-        providerId: targetProvider.id,
-        createdById: adminUser.id,
-        status: appointmentInfo.status as any,
-        type: appointmentInfo.type,
-        noShowProbability: Math.random() * 0.3,
-      },
-    })
-
-    console.log(`Created appointment: ${appointmentInfo.title}`)
-  }
-
-  // Create sample messages
-  const messageData = [
-    {
-      senderId: provider.userId,
-      receiverId: patient.userId,
-      patientId: patient.id,
-      content: 'Hello! Your test results are ready. Please schedule a follow-up appointment.',
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    },
-    {
-      senderId: patient.userId,
-      receiverId: provider.userId,
-      patientId: patient.id,
-      content: 'Thank you, Dr. Smith. When would be a good time for the follow-up?',
-      timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000),
-    },
-    {
-      senderId: nurse.userId,
-      receiverId: patient.userId,
-      patientId: patient.id,
-      content: 'Reminder: Please bring your insurance card to your next appointment.',
-      timestamp: new Date(Date.now() - 30 * 60 * 1000),
-    },
-  ]
-
-  // Create messages
-  for (const msgData of messageData) {
-    await prisma.message.create({
-      data: {
-        senderId: msgData.senderId,
-        receiverId: msgData.receiverId,
-        patientId: msgData.patientId,
-        content: msgData.content,
-        createdAt: msgData.timestamp,
-        isRead: Math.random() > 0.5,
+        patientId: patient.patient.id,
+        providerId: provider.provider.id,
+        createdById: provider.user.id,
+        title: `${appointmentTypes[i % appointmentTypes.length]} Appointment`,
+        description: `Appointment for ${patient.user.firstName} ${patient.user.lastName}`,
+        startTime,
+        endTime,
+        status: appointmentStatuses[i % appointmentStatuses.length],
+        type: appointmentTypes[i % appointmentTypes.length],
+        noShowProbability: Math.random(),
+        riskFactors: i % 5 === 0 ? 'High blood pressure' : i % 5 === 1 ? 'Diabetes' : null,
       },
     })
   }
 
-  console.log('Created sample messages')
+  console.log('Appointments created')
 
-  // Create sample medical record
-  const medicalRecord = await prisma.medicalRecord.create({
-    data: {
-      patientId: patient.id,
-      providerId: provider.id,
-      appointmentId: appointment.id,
-      chiefComplaint: 'Annual wellness check',
-      diagnosis: 'Patient in good health, no acute concerns',
-      treatment: 'Continue current lifestyle, follow up in 1 year',
-      notes: 'Patient reports feeling well, no complaints. Vital signs within normal limits.',
-      bloodPressureSystolic: 120,
-      bloodPressureDiastolic: 80,
-      heartRate: 72,
-      temperature: 98.6,
-      weight: 170.5,
-      height: 70.0,
-      readmissionRisk: 0.12,
-      suggestedCodes: 'Z00.00 - Encounter for general adult medical examination without abnormal findings',
-    },
-  })
-
-  console.log('Created medical record:', medicalRecord.id)
-
-  // Create sample billing records with unique invoice numbers
-  const timestamp = Date.now()
-  const billingData = [
-    {
-      patientIndex: 0,
-      invoiceNumber: `INV-${timestamp}-001`,
-      serviceDescription: 'Annual Physical Examination',
-      subtotal: 250.00,
-      status: 'PENDING',
-      insuranceBilled: 200.00,
-      patientResponsibility: 50.00,
-      paidAmount: 0.00,
-    },
-    {
-      patientIndex: 1,
-      invoiceNumber: `INV-${timestamp}-002`,
-      serviceDescription: 'Emergency Visit - Urgent Care',
-      subtotal: 450.00,
-      status: 'PAID',
-      insuranceBilled: 360.00,
-      patientResponsibility: 90.00,
-      paidAmount: 450.00,
-    },
-    {
-      patientIndex: 2,
-      invoiceNumber: `INV-${timestamp}-003`,
-      serviceDescription: 'Follow-up Consultation',
-      subtotal: 180.00,
-      status: 'PENDING',
-      insuranceBilled: 144.00,
-      patientResponsibility: 36.00,
-      paidAmount: 0.00,
-    },
-  ]
-
-  // Create billing records
-  for (const billing of billingData) {
-    const targetPatient = createdPatients[billing.patientIndex]
+  // Create medical records (40 records)
+  for (let i = 0; i < 40; i++) {
+    const patient = patients[i % patients.length]
+    const provider = providers[i % providers.length]
     
+    // Find an appointment for this patient and provider if exists
+    const appointment = await prisma.appointment.findFirst({
+      where: {
+        patientId: patient.patient.id,
+        providerId: provider.provider.id,
+      },
+    })
+
+    await prisma.medicalRecord.create({
+      data: {
+        patientId: patient.patient.id,
+        providerId: provider.provider.id,
+        appointmentId: appointment?.id,
+        chiefComplaint: `Chief complaint for visit ${i + 1}`,
+        diagnosis: i % 3 === 0 ? 'Hypertension' : i % 3 === 1 ? 'Diabetes' : 'Common Cold',
+        treatment: i % 4 === 0 ? 'Prescribed medication' : i % 4 === 1 ? 'Recommended lifestyle changes' : i % 4 === 2 ? 'Scheduled follow-up' : 'Referred to specialist',
+        notes: `Additional notes for medical record ${i + 1}`,
+        bloodPressureSystolic: 120 + (i % 40),
+        bloodPressureDiastolic: 80 + (i % 20),
+        heartRate: 60 + (i % 40),
+        temperature: 98.6 + (i % 2),
+        weight: 150 + (i % 50),
+        height: 65 + (i % 10),
+        labResults: i % 3 === 0 ? 'Normal' : i % 3 === 1 ? 'Elevated cholesterol' : 'Pending',
+        prescriptions: i % 4 === 0 ? 'Lisinopril 10mg daily' : i % 4 === 1 ? 'Metformin 500mg twice daily' : null,
+        readmissionRisk: Math.random(),
+        suggestedCodes: i % 2 === 0 ? 'I10,E11' : 'J00',
+      },
+    })
+  }
+
+  console.log('Medical records created')
+
+  // Create billing records (25 records)
+  const billingStatuses = ['PENDING', 'SUBMITTED', 'PROCESSING', 'PAID', 'DENIED', 'PARTIAL']
+
+  for (let i = 0; i < 25; i++) {
+    const patient = patients[i % patients.length]
+    
+    // Find a medical record for this patient if exists
+    const medicalRecord = await prisma.medicalRecord.findFirst({
+      where: {
+        patientId: patient.patient.id,
+      },
+    })
+
     await prisma.billing.create({
       data: {
-        patientId: targetPatient.id,
-        // appointmentId: null, // Make it optional
-        invoiceNumber: billing.invoiceNumber,
+        patientId: patient.patient.id,
+        appointmentId: medicalRecord?.appointmentId,
+        invoiceNumber: `INV${(10000 + i).toString()}`,
         serviceDate: new Date(),
-        serviceDescription: billing.serviceDescription,
-        icdCodes: JSON.stringify(['Z00.00']),
-        cptCodes: JSON.stringify(['99396']),
-        subtotal: billing.subtotal,
-        tax: 0.00,
-        total: billing.subtotal,
-        status: billing.status as any,
-        insuranceBilled: billing.insuranceBilled,
-        patientResponsibility: billing.patientResponsibility,
-        paidAmount: billing.paidAmount,
+        serviceDescription: `Medical service ${i + 1}`,
+        icdCodes: i % 2 === 0 ? 'I10,E11' : 'J00',
+        cptCodes: i % 3 === 0 ? '99213' : i % 3 === 1 ? '99214' : '99215',
+        subtotal: 100 + (i * 10),
+        tax: (100 + (i * 10)) * 0.08,
+        total: (100 + (i * 10)) * 1.08,
+        insuranceBilled: (100 + (i * 10)) * 0.8,
+        patientResponsibility: (100 + (i * 10)) * 0.2,
+        status: billingStatuses[i % billingStatuses.length],
+        paymentMethod: i % 3 === 0 ? 'Credit Card' : i % 3 === 1 ? 'Insurance' : 'Cash',
+        paymentDate: i % 2 === 0 ? new Date() : null,
+        paidAmount: i % 2 === 0 ? (100 + (i * 10)) * 1.08 : 0,
+        suggestedCodes: i % 2 === 0 ? 'I10,E11' : 'J00',
       },
     })
   }
 
-  console.log('Created billing records')
+  console.log('Billing records created')
 
-  console.log('\\nDatabase seeded successfully!')
-  console.log('\\n=== LOGIN CREDENTIALS ===')
-  console.log('Admin: admin@clinicease.ai (password: admin123!)')
-  console.log('Provider: dr.smith@clinicease.ai (password: provider123!)')
-  console.log('Nurse: nurse.emily@clinicease.ai (password: nurse123!)')
-  console.log('Patients:')
-  console.log('  - john.doe@example.com (password: patient123!)')
-  console.log('  - jane.smith@example.com (password: patient123!)')
-  console.log('  - mike.johnson@example.com (password: patient123!)')
-  console.log('  - lisa.brown@example.com (password: patient123!)')
-  console.log('\\nTest data includes:')
-  console.log('- 4 patients with different insurance providers')
-  console.log('- 2 providers (doctor and nurse)')
-  console.log('- Multiple appointments with various statuses')
-  console.log('- Sample messages between providers and patients')
-  console.log('- Billing records with different payment statuses')
-  console.log('- Medical records for patient visits')
+  // Create messages (40 records)
+  for (let i = 0; i < 40; i++) {
+    const sender = i % 3 === 0 ? admin : i % 3 === 1 ? providers[i % providers.length].user : patients[i % patients.length].user
+    const receiver = i % 3 === 2 ? admin : i % 3 === 0 ? providers[i % providers.length].user : patients[i % patients.length].user
+    const patient = patients[i % patients.length]
+
+    await prisma.message.create({
+      data: {
+        senderId: sender.id,
+        receiverId: receiver.id,
+        patientId: patient.patient.id,
+        content: `Message ${i + 1} from ${sender.firstName} to ${receiver.firstName}`,
+        isRead: i % 3 === 0,
+        metadata: i % 4 === 0 ? JSON.stringify({ priority: 'high' }) : null,
+      },
+    })
+  }
+
+  console.log('Messages created')
+
+  // Create demo requests (15 records)
+  const demoStatuses = ['PENDING', 'VIEWED', 'CONTACTED', 'DEMO_COMPLETED', 'CLOSED']
+  const roles = ['Admin', 'Provider', 'Patient']
+
+  for (let i = 0; i < 15; i++) {
+    await prisma.demoRequest.create({
+      data: {
+        name: `Demo Requester ${i + 1}`,
+        email: `demo${i + 1}@example.com`,
+        company: `Company ${(i % 5) + 1}`,
+        role: roles[i % roles.length],
+        message: `I would like to request a demo for ${roles[i % roles.length]} role.`,
+        preferredDate: new Date(Date.now() + (i * 24 * 60 * 60 * 1000)),
+        preferredTime: `${9 + (i % 8)}:00 AM`,
+        status: demoStatuses[i % demoStatuses.length],
+      },
+    })
+  }
+
+  console.log('Demo requests created')
+
+  // Create notifications (30 records)
+  const notificationTypes = ['appointment', 'message', 'billing', 'reminder', 'alert']
+
+  for (let i = 0; i < 30; i++) {
+    const user = i % 3 === 0 ? admin : i % 3 === 1 ? providers[i % providers.length].user : patients[i % patients.length].user
+
+    await prisma.notification.create({
+      data: {
+        userId: user.id,
+        type: notificationTypes[i % notificationTypes.length],
+        title: `Notification ${i + 1}`,
+        message: `This is notification ${i + 1} of type ${notificationTypes[i % notificationTypes.length]}`,
+        read: i % 4 === 0,
+        metadata: i % 5 === 0 ? JSON.stringify({ link: '/dashboard' }) : null,
+      },
+    })
+  }
+
+  console.log('Notifications created')
+
+  // Create shared medical records (20 records)
+  for (let i = 0; i < 20; i++) {
+    const patient = patients[i % patients.length]
+    
+    // Find a medical record for this patient
+    const medicalRecord = await prisma.medicalRecord.findFirst({
+      where: {
+        patientId: patient.patient.id,
+      },
+    })
+
+    if (medicalRecord) {
+      const sharedWithUser = i % 2 === 0 ? providers[i % providers.length].user : admin
+
+      await prisma.sharedMedicalRecord.create({
+        data: {
+          recordId: medicalRecord.id,
+          shareToken: `token${(10000 + i).toString()}`,
+          sharedBy: patient.user.id,
+          sharedWith: sharedWithUser.id,
+          message: `Shared medical record ${i + 1}`,
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+        },
+      })
+    }
+  }
+
+  console.log('Shared medical records created')
+
+  console.log('Seeding completed successfully!')
 }
 
 main()
   .catch((e) => {
-    console.error('Error during seed:', e)
+    console.error(e)
     process.exit(1)
   })
   .finally(async () => {

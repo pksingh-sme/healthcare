@@ -85,6 +85,16 @@ const navItems: NavItem[] = [
       </svg>
     ),
   },
+  {
+    title: 'Demo Requests',
+    href: '/demo-requests',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+      </svg>
+    ),
+  },
 ]
 
 export function Sidebar({ className }: SidebarProps) {
@@ -112,14 +122,35 @@ export function Sidebar({ className }: SidebarProps) {
         </Link>
       </div>
 
-
+      {/* Floating Settings Panel - Top Right (Fixed at 24px from top) */}
+      <div className="fixed top-6 right-6 z-50">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-purple-200 dark:border-purple-700 p-2 backdrop-blur-sm bg-opacity-90 dark:bg-opacity-90">
+          <div className="flex items-center space-x-1">
+            {user?.role !== 'PROVIDER' && (
+              <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors">
+                <ThemeToggle />
+              </div>
+            )}
+            <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 hover:bg-yellow-200 dark:hover:bg-yellow-800 transition-colors">
+              <NotificationCenter />
+            </div>
+            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors">
+              <SimpleSettingsDropdown />
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto pt-4">
         {navItems
           .filter(item => {
             // Show patients link only for admin users
             if (item.href === '/dashboard/patients') {
+              return user?.role === 'ADMIN'
+            }
+            // Show demo requests link only for admin users
+            if (item.href === '/demo-requests') {
               return user?.role === 'ADMIN'
             }
             return true
@@ -149,70 +180,41 @@ export function Sidebar({ className }: SidebarProps) {
           })}
       </nav>
 
-      {/* User Info and Controls at Bottom */}
-      <div className="mt-auto">
-        {/* Provider Name */}
-        <div className="p-4 border-t-2 border-gradient-to-r from-purple-300 via-pink-300 to-red-300 bg-gradient-to-r from-purple-50 via-pink-50 to-red-50 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-red-900/40">
-          <div className="flex items-center space-x-3 mb-4">
-            <Avatar className="w-12 h-12 border-2 border-purple-300 shadow-xl transform hover:scale-110 transition-all duration-300">
-              <AvatarImage 
-                src={user?.profileImage} 
-                alt={`${user?.firstName} ${user?.lastName}`}
-                className="object-cover"
-              />
-              <AvatarFallback className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white font-bold text-sm">
-                {user?.firstName?.[0]}{user?.lastName?.[0]}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent truncate">
-                {user?.firstName} {user?.lastName}
-              </p>
-              <p className="text-xs bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 bg-clip-text text-transparent truncate font-medium">
-                {user?.role === 'PROVIDER' ? 'Healthcare Provider' : user?.role}
-              </p>
-            </div>
-          </div>
-          
-          {/* Level 1: Primary Controls */}
-          <div className="space-y-2">
-            {/* Level 2: Notification & Settings */}
-            <div className="flex items-center justify-between bg-white/30 dark:bg-gray-800/30 rounded-lg p-2 backdrop-blur-sm">
-              <span className="text-xs font-medium text-purple-700 dark:text-purple-300">Quick Actions</span>
-              <div className="flex items-center space-x-2">
-                {/* Level 3: Individual Controls */}
-                <div className="flex items-center space-x-1">
-                  {user?.role !== 'PROVIDER' && (
-                    <div className="p-1 rounded-md bg-blue-100 dark:bg-blue-900/30">
-                      <ThemeToggle />
-                    </div>
-                  )}
-                  <div className="p-1 rounded-md bg-yellow-100 dark:bg-yellow-900/30">
-                    <NotificationCenter />
-                  </div>
-                  <div className="p-1 rounded-md bg-purple-100 dark:bg-purple-900/30">
-                    <SimpleSettingsDropdown />
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* User Info at Bottom */}
+      <div className="p-4 border-t-2 border-gradient-to-r from-purple-300 via-pink-300 to-red-300 bg-gradient-to-r from-purple-50 via-pink-50 to-red-50 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-red-900/40">
+        <div className="flex items-center space-x-3 mb-4">
+          <Avatar className="w-12 h-12 border-2 border-purple-300 shadow-xl transform hover:scale-110 transition-all duration-300">
+            <AvatarImage 
+              src={user?.profileImage} 
+              alt={`${user?.firstName} ${user?.lastName}`}
+              className="object-cover"
+            />
+            <AvatarFallback className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white font-bold text-sm">
+              {user?.firstName?.[0]}{user?.lastName?.[0]}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent truncate">
+              {user?.firstName} {user?.lastName}
+            </p>
+            <p className="text-xs bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 bg-clip-text text-transparent truncate font-medium">
+              {user?.role === 'PROVIDER' ? 'Healthcare Provider' : user?.role}
+            </p>
           </div>
         </div>
         
         {/* Logout for non-providers */}
         {user?.role !== 'PROVIDER' && (
-          <div className="p-4 border-t border-gradient-to-r from-red-400 via-pink-400 to-purple-400 bg-gradient-to-r from-red-50 via-pink-50 to-purple-50 dark:from-red-900/30 dark:via-pink-900/30 dark:to-purple-900/30">
-            <Button
-              onClick={handleLogout}
-              variant="ghost"
-              className="logout-button w-full justify-start font-semibold text-base transform hover:scale-105 transition-all duration-300"
-            >
-              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              Sign Out
-            </Button>
-          </div>
+          <Button
+            onClick={handleLogout}
+            variant="ghost"
+            className="logout-button w-full justify-start font-semibold text-base transform hover:scale-105 transition-all duration-300"
+          >
+            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Sign Out
+          </Button>
         )}
       </div>
     </div>

@@ -14,10 +14,12 @@ import {
   BuildingOfficeIcon,
   ArrowRightIcon
 } from '@heroicons/react/24/outline'
+import { DemoRequestModal } from '@/components/demo-request-modal'
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [currentImage, setCurrentImage] = useState(0)
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false)
   
   const benefits = [
     {
@@ -77,6 +79,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Demo Request Modal */}
+      <DemoRequestModal open={isDemoModalOpen} onClose={() => setIsDemoModalOpen(false)} />
+      
       {/* Hero Section */}
       <div className="relative overflow-hidden h-screen max-h-[800px]">
         {/* Background with gradient overlay */}
@@ -116,10 +121,12 @@ export default function Home() {
                   Get Started
                 </Link>
               </Button>
-              <Button variant="outline" className="border-2 border-white text-blue-600 hover:bg-white/10 px-8 py-3 text-lg rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                <Link href="/login">
-                  Book Demo
-                </Link>
+              <Button 
+                variant="outline" 
+                className="border-2 border-white text-blue-600 hover:bg-white/10 px-8 py-3 text-lg rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                onClick={() => setIsDemoModalOpen(true)}
+              >
+                Book Demo
               </Button>
             </div>
           </div>
@@ -236,10 +243,12 @@ export default function Home() {
                 Start Free Trial
               </Link>
             </Button>
-            <Button variant="outline" className="border-2 border-white text-blue-600 hover:bg-white/10 px-8 py-3 text-lg rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl font-bold">
-              <Link href="/login">
-                Schedule Demo
-              </Link>
+            <Button 
+              variant="outline" 
+              className="border-2 border-white text-blue-600 hover:bg-white/10 px-8 py-3 text-lg rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl font-bold"
+              onClick={() => setIsDemoModalOpen(true)}
+            >
+              Schedule Demo
             </Button>
           </div>
           

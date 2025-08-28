@@ -72,9 +72,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isClient, setIsClient] = useState(false)
+
+  // Set isClient to true when component mounts
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // Load token from localStorage on mount
   useEffect(() => {
+    if (!isClient) return
+    
     const savedToken = localStorage.getItem('token')
     if (savedToken) {
       setToken(savedToken)
@@ -82,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } else {
       setLoading(false)
     }
-  }, [])
+  }, [isClient])
 
   const fetchUser = async (authToken: string) => {
     try {
@@ -194,7 +202,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem('token')
       
       // Redirect to login page after logout
-      window.location.href = '/login'
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login'
+      }
     }
   }
 

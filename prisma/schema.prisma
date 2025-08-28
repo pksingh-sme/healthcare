@@ -15,6 +15,7 @@ model User {
   firstName           String
   lastName            String
   phone               String?
+  profileImage        String?
   isActive            Boolean       @default(true)
   twoFAEnabled        Boolean       @default(false)
   twoFASecret         String?
@@ -259,4 +260,28 @@ enum InsuranceType {
   MEDICAID
   SELF_PAY
   OTHER
+}
+
+enum DemoRequestStatus {
+  PENDING
+  VIEWED
+  CONTACTED
+  DEMO_COMPLETED
+  CLOSED
+}
+
+model DemoRequest {
+  id            String             @id @default(cuid())
+  name          String
+  email         String
+  company       String
+  role          String
+  message       String?
+  preferredDate DateTime?
+  preferredTime String?
+  status        DemoRequestStatus  @default(PENDING)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@map("demo_requests")
 }
