@@ -1,4 +1,4 @@
-# ClinicEase AI - Healthcare Management System
+# Healthcare Management by ClinchInfoSystems
 
 A comprehensive full-stack healthcare management system built with Next.js, featuring AI-powered scheduling, real-time messaging, billing automation, and HIPAA-compliant patient management.
 
@@ -6,7 +6,7 @@ A comprehensive full-stack healthcare management system built with Next.js, feat
 
 ## 🏥 Overview
 
-ClinicEase AI streamlines clinic operations with intelligent automation, secure communication, and compliant data handling. Built for healthcare providers who need efficiency and patients who demand quality care.
+Healthcare AI streamlines clinic operations with intelligent automation, secure communication, and compliant data handling. Built for healthcare providers who need efficiency and patients who demand quality care.
 
 ### Key Features
 
@@ -38,8 +38,8 @@ ClinicEase AI streamlines clinic operations with intelligent automation, secure 
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-organization/clinicease-ai.git
-cd clinicease-ai
+git clone https://github.com/pksingh-sme/healthcare.git
+cd healthcare
 
 # Install dependencies
 npm install
@@ -63,7 +63,6 @@ Visit `http://localhost:3001` to see the application.
 ## 📁 Project Structure
 
 ```
-├── docs/                  # Documentation files
 ├── prisma/                # Database schema and migrations
 ├── public/                # Static assets
 ├── src/
@@ -86,21 +85,6 @@ Visit `http://localhost:3001` to see the application.
 2. Configure environment variables
 3. Deploy automatically on push
 
-### AWS
-
-Multiple deployment options available:
-- [AWS ECS Deployment Guide](docs/AWS_DEPLOYMENT.md)
-- [AWS Elastic Beanstalk Deployment Guide](docs/AWS_ELASTIC_BEANSTALK_DEPLOYMENT.md)
-- [Step-by-Step AWS Deployment Instructions](docs/AWS_STEP_BY_STEP.md)
-
-## 📚 Documentation
-
-- [Development Workflow](docs/DEVELOPMENT_WORKFLOW.md)
-- [Branching Strategy](docs/BRANCHING_STRATEGY.md)
-- [Deployment Guide](docs/DEPLOYMENT.md)
-- [AWS Deployment Options](docs/AWS_DEPLOYMENT_SUMMARY.md)
-- [Contributing Guidelines](docs/CONTRIBUTING.md)
-
 ## 👥 User Roles
 
 - **Admin** - Full system access and user management
@@ -114,18 +98,7 @@ Multiple deployment options available:
 - Role-based access control
 - Audit logging for compliance
 
-## 🤝 Contributing
-
-See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for contribution guidelines.
-
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+@copyright 2025. 
 
-## 🏥 Healthcare Disclaimer
-
-ClinicEase AI is designed to assist healthcare operations but should not be used as a substitute for professional medical advice, diagnosis, or treatment.
-
----
-
-**Built with ❤️ for healthcare providers and patients**
