@@ -4,6 +4,6 @@ export async function GET() {
   return NextResponse.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    service: 'ClinicEase AI Healthcare Management System'
+    service: 'ClinicEase AI Healthcare Management System by Clinch Infosystems'
   })
 }

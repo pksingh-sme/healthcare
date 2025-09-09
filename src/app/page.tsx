@@ -109,6 +109,11 @@ export default function Home() {
         {/* Hero Content */}
         <div className="relative z-10 flex items-center justify-center h-full">
           <div className="text-center px-4 sm:px-6 lg:px-8">
+            <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-6 shadow-lg mx-auto">
+              <svg className="w-12 h-12" viewBox="0 0 54 54" xmlns="http://www.w3.org/2000/svg" fill="#FFFFFF" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M53.5529 13.0146C53.5529 10.2546 52.081 7.71957 49.708 6.35457L42.1534 1.98957C39.7804 0.62457 36.8517 0.62457 34.4637 1.98957L4.20034 19.4346C1.82733 20.8146 0.355469 23.3496 0.355469 26.0796V28.6146C0.355469 31.3596 1.82733 33.8946 4.20034 35.2596L34.4637 52.7196C36.8367 54.0846 39.7654 54.0846 42.1534 52.7196L49.708 48.3546C52.081 46.9896 53.5529 44.4546 53.5529 41.7096C53.5529 37.4646 50.1135 34.0296 45.8631 34.0296H38.7741V40.4496L16.1405 27.3996L38.7741 14.3496V20.6946H45.8631C50.1135 20.6946 53.5529 17.2596 53.5529 13.0146Z"/>
+              </svg>
+            </div>
             <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-teal-600 bg-clip-text text-transparent mb-6 animate-fade-in">
               Smarter Healthcare Management with AI
             </h1>
@@ -277,8 +282,8 @@ export default function Home() {
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center mb-6">
                 <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mr-4 shadow-lg">
-                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  <svg className="w-7 h-7" viewBox="0 0 54 54" xmlns="http://www.w3.org/2000/svg" fill="#FFFFFF" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M53.5529 13.0146C53.5529 10.2546 52.081 7.71957 49.708 6.35457L42.1534 1.98957C39.7804 0.62457 36.8517 0.62457 34.4637 1.98957L4.20034 19.4346C1.82733 20.8146 0.355469 23.3496 0.355469 26.0796V28.6146C0.355469 31.3596 1.82733 33.8946 4.20034 35.2596L34.4637 52.7196C36.8367 54.0846 39.7654 54.0846 42.1534 52.7196L49.708 48.3546C52.081 46.9896 53.5529 44.4546 53.5529 41.7096C53.5529 37.4646 50.1135 34.0296 45.8631 34.0296H38.7741V40.4496L16.1405 27.3996L38.7741 14.3496V20.6946H45.8631C50.1135 20.6946 53.5529 17.2596 53.5529 13.0146Z"/>
                   </svg>
                 </div>
                 <h3 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">ClinicEase AI</h3>
@@ -331,7 +336,7 @@ export default function Home() {
           </div>
           
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} ClinicEase AI. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()}  Clinch Infosystems. All rights reserved.</p>
           </div>
         </div>
       </footer>

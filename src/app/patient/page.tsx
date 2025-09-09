@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { formatSimpleProviderName } from '@/lib/format'
 import { SocketProvider } from '@/contexts/SocketContext'
 import { MessagingCenter } from '@/components/realtime/MessagingCenter'
+import jsPDF from 'jspdf'
 
 // Inline Dialog Components to replace problematic import
 interface DialogProps {
@@ -17,26 +18,30 @@ function Dialog({ open, onOpenChange, children }: DialogProps) {
   if (!open) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => onOpenChange(false)} />
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => onOpenChange(false)} />
       <div className="relative z-10 w-full max-w-2xl mx-4">{children}</div>
     </div>
   )
 }
 
 function DialogContent({ children, className = '' }: { children: React.ReactNode, className?: string }) {
-  return <div className={`modal-colorful p-6 ${className}`}>{children}</div>
+  return (
+    <div className={`bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-purple-200 dark:border-purple-700 overflow-hidden ${className}`}>
+      {children}
+    </div>
+  )
 }
 
 function DialogHeader({ children }: { children: React.ReactNode }) {
-  return <div className="space-y-2 mb-4">{children}</div>
+  return <div className="space-y-3 mb-6 px-6 pt-6">{children}</div>
 }
 
 function DialogTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{children}</h2>
+  return <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{children}</h2>
 }
 
 function DialogDescription({ children }: { children: React.ReactNode }) {
-  return <p className="text-purple-600 dark:text-purple-300">{children}</p>
+  return <p className="text-purple-600 dark:text-purple-300 text-base">{children}</p>
 }
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -243,6 +248,80 @@ export default function PatientPortal() {
     )
   }
 
+  // Function to download invoice as PDF
+  const downloadInvoice = (record: BillingRecord) => {
+    // Create a new jsPDF instance
+    const doc = new jsPDF();
+    
+    // Set font properties
+    doc.setFont('helvetica');
+    doc.setFontSize(12);
+    
+    // Add clinic logo (simplified representation)
+    doc.setDrawColor(59, 130, 246); // Blue
+    doc.setFillColor(147, 51, 234); // Purple
+    doc.rect(20, 10, 20, 20, 'F'); // Background rectangle
+    doc.setTextColor(255, 255, 255); // White text
+    doc.setFontSize(10);
+    doc.text('CE', 27, 22); // Logo text
+    
+    // Add clinic name
+    doc.setFontSize(18);
+    doc.setTextColor(59, 130, 246); // Blue
+    doc.text('ClinicEase AI', 45, 18);
+    doc.setFontSize(10);
+    doc.setTextColor(147, 51, 234); // Purple
+    doc.text('Smarter Healthcare Management', 45, 25);
+    
+    // Reset font size and color
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    
+    // Add invoice title
+    doc.setFontSize(16);
+    doc.setTextColor(100, 100, 255); // Purple color
+    doc.text('INVOICE', 20, 45);
+    
+    // Reset font size and color
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    
+    // Add invoice details
+    doc.text(`Invoice Number: ${record.invoiceNumber}`, 20, 60);
+    doc.text(`Service Date: ${new Date(record.serviceDate).toLocaleDateString()}`, 20, 70);
+    doc.text(`Service Description: ${record.serviceDescription}`, 20, 80);
+    doc.text(`Status: ${record.status}`, 20, 90);
+    
+    // Add payment breakdown section
+    doc.setFontSize(14);
+    doc.setTextColor(100, 100, 255); // Purple color
+    doc.text('Payment Breakdown:', 20, 110);
+    
+    // Reset font size and color
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    
+    doc.text(`Subtotal: $${record.total.toFixed(2)}`, 20, 120);
+    doc.text(`Tax: $0.00`, 20, 130);
+    doc.text(`Total: $${record.total.toFixed(2)}`, 20, 140);
+    doc.text(`Paid Amount: $${record.paidAmount.toFixed(2)}`, 20, 150);
+    doc.text(`Balance Due: $${(record.total - record.paidAmount).toFixed(2)}`, 20, 160);
+    
+    // Add footer
+    const pageHeight = doc.internal.pageSize.height;
+    doc.setFontSize(14);
+    doc.setTextColor(0, 150, 0); // Green color
+    doc.text('Thank you for your business!', 20, pageHeight - 40);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Clinch Infosystems USA', 20, pageHeight - 25);
+    doc.text('Phone: +1 (425) 459 0221', 20, pageHeight - 15);
+    
+    // Save the PDF
+    doc.save(`invoice-${record.invoiceNumber}.pdf`);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-blue-900 flex items-center justify-center">
@@ -278,7 +357,7 @@ export default function PatientPortal() {
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Patient Portal</h1>
               <p className="text-blue-600 dark:text-blue-300 mt-1 font-medium">
-                Welcome back, {user.firstName}! Manage your healthcare information.
+                Welcome back, <strong>{user.firstName}</strong>! Manage your healthcare information.
               </p>
             </div>
             <Button
@@ -587,53 +666,53 @@ export default function PatientPortal() {
             </DialogDescription>
           </DialogHeader>
           {selectedAppointment && (
-            <div className="space-y-6">
+            <div className="space-y-6 p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-600">Appointment Title</Label>
-                  <p className="text-sm">{selectedAppointment.title}</p>
+                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Appointment Title</Label>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedAppointment.title}</p>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-600">Type</Label>
-                  <p className="text-sm">{selectedAppointment.type || 'General Consultation'}</p>
+                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Type</Label>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedAppointment.type || 'General Consultation'}</p>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-600">Date & Start Time</Label>
-                  <p className="text-sm">{new Date(selectedAppointment.startTime).toLocaleString()}</p>
+                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Date & Start Time</Label>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{new Date(selectedAppointment.startTime).toLocaleString()}</p>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-600">End Time</Label>
-                  <p className="text-sm">{new Date(selectedAppointment.endTime).toLocaleString()}</p>
+                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">End Time</Label>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{new Date(selectedAppointment.endTime).toLocaleString()}</p>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-600">Duration</Label>
-                  <p className="text-sm">
+                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Duration</Label>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
                     {Math.round((new Date(selectedAppointment.endTime).getTime() - new Date(selectedAppointment.startTime).getTime()) / (1000 * 60))} minutes
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-600">Status</Label>
+                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Status</Label>
                   <div>{getStatusBadge(selectedAppointment.status)}</div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-600">Healthcare Provider</Label>
-                  <p className="text-sm">Dr. {selectedAppointment.provider.user.firstName} {selectedAppointment.provider.user.lastName}</p>
+                <div className="space-y-2 md:col-span-2">
+                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Healthcare Provider</Label>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Dr. {selectedAppointment.provider.user.firstName} {selectedAppointment.provider.user.lastName}</p>
                 </div>
               </div>
               
               {selectedAppointment.status === 'SCHEDULED' && (
-                <div className="border-t pt-4">
-                  <h4 className="text-sm font-medium text-gray-900 mb-2">Preparation Instructions</h4>
-                  <ul className="text-sm text-gray-600 space-y-1">
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Preparation Instructions</h4>
+                  <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
                     <li>• Please arrive 15 minutes early for check-in</li>
                     <li>• Bring a valid photo ID and insurance card</li>
-                    <li>• Prepare a list of current medications</li>
-                    <li>• Write down any questions or concerns you'd like to discuss</li>
+                    <li>Prepare a list of current medications</li>
+                    <li>Write down any questions or concerns you'd like to discuss</li>
                   </ul>
                 </div>
               )}
               
-              <div className="border-t pt-4 flex justify-end space-x-2">
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex justify-end space-x-2">
                 <Button variant="outline" onClick={() => setSelectedAppointment(null)}>
                   Close
                 </Button>
@@ -658,40 +737,40 @@ export default function PatientPortal() {
             </DialogDescription>
           </DialogHeader>
           {selectedBillingRecord && (
-            <div className="space-y-6">
+            <div className="space-y-6 p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-600">Invoice Number</Label>
-                  <p className="text-sm font-mono">{selectedBillingRecord.invoiceNumber}</p>
+                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Invoice Number</Label>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white font-mono">{selectedBillingRecord.invoiceNumber}</p>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-600">Service Date</Label>
-                  <p className="text-sm">{new Date(selectedBillingRecord.serviceDate).toLocaleDateString()}</p>
+                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Service Date</Label>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{new Date(selectedBillingRecord.serviceDate).toLocaleDateString()}</p>
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Service Description</Label>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedBillingRecord.serviceDescription}</p>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-600">Service Description</Label>
-                  <p className="text-sm">{selectedBillingRecord.serviceDescription}</p>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-600">Status</Label>
+                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Status</Label>
                   <div>{getBillingStatusBadge(selectedBillingRecord.status)}</div>
                 </div>
               </div>
               
-              <div className="border rounded-lg p-4 bg-gray-50">
-                <h4 className="text-sm font-medium text-gray-900 mb-3">Payment Breakdown</h4>
+              <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600">
+                <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Payment Breakdown</h4>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>Subtotal:</span>
-                    <span>${selectedBillingRecord.total.toFixed(2)}</span>
+                    <span className="text-gray-600 dark:text-gray-300">Subtotal:</span>
+                    <span className="text-gray-900 dark:text-white">${selectedBillingRecord.total.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span>Amount Paid:</span>
-                    <span className="text-green-600">${selectedBillingRecord.paidAmount.toFixed(2)}</span>
+                    <span className="text-gray-600 dark:text-gray-300">Amount Paid:</span>
+                    <span className="text-green-600 dark:text-green-400">${selectedBillingRecord.paidAmount.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-sm font-medium border-t pt-2">
-                    <span>Balance Due:</span>
-                    <span className={`${selectedBillingRecord.total - selectedBillingRecord.paidAmount === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <div className="flex justify-between text-sm font-medium border-t border-gray-200 dark:border-gray-600 pt-2">
+                    <span className="text-gray-900 dark:text-white">Balance Due:</span>
+                    <span className={`${selectedBillingRecord.total - selectedBillingRecord.paidAmount === 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                       ${(selectedBillingRecord.total - selectedBillingRecord.paidAmount).toFixed(2)}
                     </span>
                   </div>
@@ -699,8 +778,8 @@ export default function PatientPortal() {
               </div>
               
               {selectedBillingRecord.status === 'PENDING' && (
-                <div className="border-t pt-4">
-                  <h4 className="text-sm font-medium text-gray-900 mb-2">Payment Options</h4>
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Payment Options</h4>
                   <div className="space-y-2">
                     <Button className="w-full clinic-gradient text-white">
                       Pay with Credit Card
@@ -712,11 +791,11 @@ export default function PatientPortal() {
                 </div>
               )}
               
-              <div className="border-t pt-4 flex justify-end space-x-2">
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex justify-end space-x-2">
                 <Button variant="outline" onClick={() => setSelectedBillingRecord(null)}>
                   Close
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => downloadInvoice(selectedBillingRecord)}>
                   Download Invoice
                 </Button>
               </div>

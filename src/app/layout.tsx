@@ -6,7 +6,7 @@ import { Providers } from '@/components/providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'ClinicEase AI - Healthcare Management System',
+  title: 'ClinicEase AI - Healthcare Management System by Clinch Infosystems',
   description: 'Streamlining appointment scheduling, patient management, billing, and clinical support for healthcare clinics',
 }
 

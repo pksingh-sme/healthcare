@@ -100,7 +100,7 @@ export function DemoRequestModal({ open, onClose }: DemoRequestModalProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p className="text-gray-600">Thank you for your interest in ClinicEase AI!</p>
+            <p className="text-gray-600">Thank you for your interest in ClinicEase AI. Design and developed by <a href='https://www.clinchinfosystems.com/'>Clinch Infosystems</a>!</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">

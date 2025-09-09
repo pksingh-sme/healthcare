@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyTokenFromRequest } from '@/lib/auth'
+import { BillingStatus } from '@prisma/client'
 
 export async function POST(
   request: NextRequest,
@@ -75,11 +76,14 @@ export async function POST(
     const newPaidAmount = existingRecord.paidAmount + amount
     let newStatus = existingRecord.status
 
-    // Update status based on payment completion
+    // Update status based on payment completion with validation
+    // This will correct any inconsistencies in the database
     if (newPaidAmount >= existingRecord.total - 0.01) { // Allow for rounding differences
-      newStatus = 'PAID'
+      newStatus = BillingStatus.PAID
     } else if (newPaidAmount > 0) {
-      newStatus = 'PARTIAL'
+      newStatus = BillingStatus.PARTIAL
+    } else {
+      newStatus = BillingStatus.PENDING
     }
 
     // Update the billing record

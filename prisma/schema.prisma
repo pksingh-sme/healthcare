@@ -8,27 +8,27 @@ datasource db {
 }
 
 model User {
-  id                  String        @id @default(cuid())
-  email               String        @unique
+  id                  String                @id @default(cuid())
+  email               String                @unique
   password            String
-  role                Role          @default(PATIENT)
+  role                Role                  @default(PATIENT)
   firstName           String
   lastName            String
   phone               String?
-  profileImage        String?
-  isActive            Boolean       @default(true)
-  twoFAEnabled        Boolean       @default(false)
+  isActive            Boolean               @default(true)
+  twoFAEnabled        Boolean               @default(false)
   twoFASecret         String?
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
-  createdAppointments Appointment[] @relation("CreatedBy")
-  sentMessages        Message[]     @relation("SentMessages")
-  receivedMessages    Message[]     @relation("ReceivedMessages")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  profileImage        String?
+  createdAppointments Appointment[]         @relation("CreatedBy")
+  receivedMessages    Message[]             @relation("ReceivedMessages")
+  sentMessages        Message[]             @relation("SentMessages")
+  notifications       Notification[]        @relation("UserNotifications")
   patient             Patient?
   provider            Provider?
   sessions            Session[]
   sharedRecords       SharedMedicalRecord[] @relation("SharedByUser")
-  notifications       Notification[] @relation("UserNotifications")
 
   @@map("users")
 }
@@ -104,7 +104,7 @@ model Appointment {
 }
 
 model MedicalRecord {
-  id                     String       @id @default(cuid())
+  id                     String                @id @default(cuid())
   patientId              String
   providerId             String
   appointmentId          String?
@@ -120,13 +120,13 @@ model MedicalRecord {
   height                 Float?
   labResults             String?
   prescriptions          String?
-  readmissionRisk        Float        @default(0.0)
+  readmissionRisk        Float                 @default(0.0)
   suggestedCodes         String?
-  createdAt              DateTime     @default(now())
-  updatedAt              DateTime     @updatedAt
-  appointment            Appointment? @relation(fields: [appointmentId], references: [id])
-  patient                Patient      @relation(fields: [patientId], references: [id])
-  provider               Provider     @relation(fields: [providerId], references: [id])
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  appointment            Appointment?          @relation(fields: [appointmentId], references: [id])
+  patient                Patient               @relation(fields: [patientId], references: [id])
+  provider               Provider              @relation(fields: [providerId], references: [id])
   sharedRecords          SharedMedicalRecord[]
 
   @@map("medical_records")
@@ -200,18 +200,18 @@ model Settings {
 }
 
 model SharedMedicalRecord {
-  id         String   @id @default(cuid())
-  recordId   String
-  shareToken String   @unique
-  sharedBy   String
-  sharedWith String
-  message    String?
-  expiresAt  DateTime
-  accessedAt DateTime?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  record     MedicalRecord @relation(fields: [recordId], references: [id], onDelete: Cascade)
-  sharedByUser User @relation("SharedByUser", fields: [sharedBy], references: [id])
+  id           String        @id @default(cuid())
+  recordId     String
+  shareToken   String        @unique
+  sharedBy     String
+  sharedWith   String
+  message      String?
+  expiresAt    DateTime
+  accessedAt   DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  record       MedicalRecord @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  sharedByUser User          @relation("SharedByUser", fields: [sharedBy], references: [id])
 
   @@map("shared_medical_records")
 }
@@ -229,6 +229,22 @@ model Notification {
   user      User     @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
+}
+
+model DemoRequest {
+  id            String            @id @default(cuid())
+  name          String
+  email         String
+  company       String
+  role          String
+  message       String?
+  preferredDate DateTime?
+  preferredTime String?
+  status        DemoRequestStatus @default(PENDING)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@map("demo_requests")
 }
 
 enum Role {
@@ -268,20 +284,4 @@ enum DemoRequestStatus {
   CONTACTED
   DEMO_COMPLETED
   CLOSED
-}
-
-model DemoRequest {
-  id            String             @id @default(cuid())
-  name          String
-  email         String
-  company       String
-  role          String
-  message       String?
-  preferredDate DateTime?
-  preferredTime String?
-  status        DemoRequestStatus  @default(PENDING)
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-
-  @@map("demo_requests")
 }

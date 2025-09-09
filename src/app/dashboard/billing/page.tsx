@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/contexts/AuthContext'
 import { formatSimpleProviderName } from '@/lib/format'
+import jsPDF from 'jspdf'
 
 interface BillingRecord {
   id: string
@@ -298,6 +299,92 @@ export default function BillingPage() {
       setProcessingPayment(false)
     }
   }
+
+  // Function to download invoice as PDF
+  const downloadInvoice = (record: BillingRecord) => {
+    // Create a new jsPDF instance
+    const doc = new jsPDF();
+    
+    // Set font properties
+    doc.setFont('helvetica');
+    doc.setFontSize(12);
+    
+    // Add clinic logo (simplified representation)
+    doc.setDrawColor(59, 130, 246); // Blue
+    doc.setFillColor(59, 130, 246); // Purple
+    doc.rect(20, 10, 20, 20, 'F'); // Background rectangle
+    doc.setTextColor(255, 255, 255); // White text
+    doc.setFontSize(24);
+    doc.text('C', 27, 22); // Logo text
+    
+    // Add clinic name
+    doc.setFontSize(18);
+    doc.setTextColor(59, 130, 246); // Blue
+    doc.text('ClinicEase AI', 45, 18);
+    doc.setFontSize(10);
+    doc.setTextColor(147, 51, 234); // Purple
+    doc.text('Smarter Healthcare Management', 45, 25);
+    
+    // Reset font size and color
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    
+    // Add invoice title
+    doc.setFontSize(16);
+    doc.setTextColor(100, 100, 255); // Purple color
+    doc.text('INVOICE', 20, 45);
+    
+    // Reset font size and color
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    
+    // Add invoice details
+    doc.text(`Invoice Number: ${record.invoiceNumber}`, 20, 60);
+    doc.text(`Service Date: ${new Date(record.serviceDate).toLocaleDateString()}`, 20, 70);
+    doc.text(`Service Description: ${record.serviceDescription}`, 20, 80);
+    doc.text(`Status: ${record.status}`, 20, 90);
+    
+    // Add patient information
+    doc.setFontSize(14);
+    doc.setTextColor(100, 100, 255); // Purple color
+    doc.text('Patient Information:', 20, 110);
+    
+    // Reset font size and color
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    
+    doc.text(`Name: ${record.patient.user.firstName} ${record.patient.user.lastName}`, 20, 120);
+    doc.text(`Email: ${record.patient.user.email}`, 20, 130);
+    
+    // Add payment breakdown section
+    doc.setFontSize(14);
+    doc.setTextColor(100, 100, 255); // Purple color
+    doc.text('Payment Breakdown:', 20, 150);
+    
+    // Reset font size and color
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    
+    doc.text(`Subtotal: $${record.subtotal.toFixed(2)}`, 20, 160);
+    doc.text(`Tax: $${record.tax.toFixed(2)}`, 20, 170);
+    doc.text(`Total: $${record.total.toFixed(2)}`, 20, 180);
+    doc.text(`Paid Amount: $${record.paidAmount.toFixed(2)}`, 20, 190);
+    doc.text(`Balance Due: $${(record.total - record.paidAmount).toFixed(2)}`, 20, 200);
+    
+    // Add footer
+    const pageHeight = doc.internal.pageSize.height;
+    doc.setFontSize(14);
+    doc.setTextColor(0, 150, 0); // Green color
+    doc.text('Thank you for your business!', 20, pageHeight - 40);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Clinch Infosystems USA', 20, pageHeight - 25);
+    doc.text('Phone: +1 (425) 459 0221', 20, pageHeight - 15);
+    
+    // Save the PDF
+    doc.save(`invoice-${record.invoiceNumber}.pdf`);
+  };
 
   if (loading) {
     return (
@@ -900,7 +987,11 @@ export default function BillingPage() {
                       Process Payment
                     </Button>
                   )}
-                  <Button variant="outline" className="flex-1">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => downloadInvoice(selectedRecord)}
+                  >
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>

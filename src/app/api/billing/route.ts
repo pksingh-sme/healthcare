@@ -95,10 +95,13 @@ export async function POST(request: NextRequest) {
       tax = 0,
       icdCodes = [],
       cptCodes = [],
+      // Add initial payment information
+      initialPaymentAmount = 0,
+      initialPaymentMethod,
     } = body
 
     // Validate required fields
-    if (!patientId || !serviceDescription || !subtotal) {
+    if (!patientId || !serviceDescription || subtotal === undefined) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -109,11 +112,20 @@ export async function POST(request: NextRequest) {
     const invoiceNumber = `INV-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
 
     const total = subtotal + tax
+    const paidAmount = initialPaymentAmount || 0
 
     // AI Stub: Auto-suggest ICD-10/CPT codes based on service description
     const suggestedCodes = {
       icd: serviceDescription.toLowerCase().includes('flu') ? ['J09.X2'] : [],
       cpt: serviceDescription.toLowerCase().includes('consultation') ? ['99213'] : [],
+    }
+
+    // Determine initial status based on payment
+    let initialStatus: typeof BillingStatus[keyof typeof BillingStatus] = BillingStatus.PENDING
+    if (paidAmount >= total - 0.01) {
+      initialStatus = BillingStatus.PAID
+    } else if (paidAmount > 0) {
+      initialStatus = BillingStatus.PARTIAL
     }
 
     const billing = await prisma.billing.create({
@@ -128,10 +140,12 @@ export async function POST(request: NextRequest) {
         subtotal,
         tax,
         total,
-        status: BillingStatus.PENDING,
+        status: initialStatus,
         insuranceBilled: 0,
         patientResponsibility: total,
-        paidAmount: 0,
+        paidAmount,
+        ...(initialPaymentMethod && { paymentMethod: initialPaymentMethod }),
+        ...(paidAmount > 0 && { paymentDate: new Date() }),
       },
       include: {
         patient: {
@@ -199,12 +213,27 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Calculate new status based on payment
-    let newStatus = billing.status
-    if (paidAmount >= billing.total) {
-      newStatus = BillingStatus.PAID
-    } else if (paidAmount > 0) {
-      newStatus = BillingStatus.PENDING // Could be PARTIAL if we had that status
+    // Calculate new paid amount and determine new status
+    const newPaidAmount = billing.paidAmount + (paidAmount || 0);
+    let newStatus = billing.status;
+
+    // Update status based on payment completion
+    if (newPaidAmount >= billing.total - 0.01) { // Allow for rounding differences
+      newStatus = BillingStatus.PAID;
+    } else if (newPaidAmount > 0) {
+      newStatus = BillingStatus.PARTIAL;
+    } else if (newPaidAmount === 0) {
+      newStatus = BillingStatus.PENDING;
+    }
+
+    // Additional validation to ensure status consistency
+    // This will correct any inconsistencies in the database
+    if (newPaidAmount >= billing.total - 0.01) {
+      newStatus = BillingStatus.PAID;
+    } else if (newPaidAmount > 0) {
+      newStatus = BillingStatus.PARTIAL;
+    } else {
+      newStatus = BillingStatus.PENDING;
     }
 
     const updatedBilling = await prisma.billing.update({
@@ -212,7 +241,7 @@ export async function PATCH(request: NextRequest) {
       data: {
         ...(paymentMethod && { paymentMethod }),
         ...(paidAmount !== undefined && {
-          paidAmount: billing.paidAmount + paidAmount,
+          paidAmount: newPaidAmount,
           paymentDate: new Date(),
         }),
         status: newStatus,
