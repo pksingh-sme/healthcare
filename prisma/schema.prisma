@@ -29,6 +29,7 @@ model User {
   provider            Provider?
   sessions            Session[]
   sharedRecords       SharedMedicalRecord[] @relation("SharedByUser")
+  auditLogs           AuditLog[]
 
   @@map("users")
 }
@@ -178,16 +179,6 @@ model Message {
   @@map("messages")
 }
 
-model Session {
-  id        String   @id @default(cuid())
-  userId    String
-  token     String   @unique
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("sessions")
-}
 
 model Settings {
   id        String   @id @default(cuid())
@@ -285,3 +276,52 @@ enum DemoRequestStatus {
   DEMO_COMPLETED
   CLOSED
 }
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  userId       String
+  action       String
+  resourceType String
+  resourceId   String?
+  details      String?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+// Update the Session model for enhanced security
+model Session {
+  id             String   @id @default(cuid())
+  userId         String
+  token          String   @unique
+  expiresAt      DateTime
+  ipAddress      String?
+  userAgent      String?
+  lastActivityAt DateTime?
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model BusinessAssociate {
+  id              String   @id @default(cuid())
+  name            String
+  contactEmail    String
+  contactPhone    String?
+  agreementDate   DateTime
+  renewalDate     DateTime
+  status          String   @default("ACTIVE")
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  integrationType String?
+
+  @@map("business_associates")
+}
+
+// Update the Session model for enhanced security

@@ -262,8 +262,8 @@ export default function PatientPortal() {
     doc.setFillColor(147, 51, 234); // Purple
     doc.rect(20, 10, 20, 20, 'F'); // Background rectangle
     doc.setTextColor(255, 255, 255); // White text
-    doc.setFontSize(10);
-    doc.text('CE', 27, 22); // Logo text
+    doc.setFontSize(24);
+    doc.text('C', 27, 22); // Logo text
     
     // Add clinic name
     doc.setFontSize(18);

@@ -24,9 +24,7 @@ export default function MessagesPage() {
           <MessagingCenter />
         </div>
         
-        <div className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 rounded-xl p-4 border border-rose-200 dark:border-rose-700">
-          <ConnectionStatus />
-        </div>
+        <ConnectionStatus />
       </div>
     </DashboardLayout>
   )

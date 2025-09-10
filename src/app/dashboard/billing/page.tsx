@@ -127,8 +127,18 @@ export default function BillingPage() {
 
       if (response.ok) {
         const data = await response.json()
-        setBillingRecords(data.data || [])
-        calculateStats(data.data || [])
+        let records = data.data || []
+        
+        // Sort by serviceDate descending (newest first) - this is now handled by the API
+        // but we'll keep it here as a fallback
+        records.sort((a: BillingRecord, b: BillingRecord): number => {
+          const dateA = new Date(a.serviceDate);
+          const dateB = new Date(b.serviceDate);
+          return dateB.getTime() - dateA.getTime();
+        });
+        
+        setBillingRecords(records)
+        calculateStats(records)
       }
     } catch (error) {
       console.error('Error fetching billing data:', error)
@@ -162,12 +172,15 @@ export default function BillingPage() {
       if (record.status === 'PAID') {
         acc.paidAmount += record.total
         acc.paidInvoices += 1
-      } else if (record.status === 'PENDING') {
+      } else if (record.status === 'PENDING' || record.status === 'SUBMITTED' || record.status === 'PROCESSING') {
         acc.pendingAmount += record.total - record.paidAmount
         acc.pendingInvoices += 1
-      } else if (record.status === 'OVERDUE') {
+      } else if (record.status === 'OVERDUE' || record.status === 'DENIED') {
         acc.overdueAmount += record.total - record.paidAmount
         acc.overdueInvoices += 1
+      } else if (record.status === 'PARTIAL') {
+        acc.pendingAmount += record.total - record.paidAmount
+        acc.pendingInvoices += 1
       }
 
       return acc
@@ -233,6 +246,9 @@ export default function BillingPage() {
       PAID: { color: 'bg-green-100 text-green-800 border-green-200', label: 'Paid' },
       OVERDUE: { color: 'bg-red-100 text-red-800 border-red-200', label: 'Overdue' },
       PARTIAL: { color: 'bg-orange-100 text-orange-800 border-orange-200', label: 'Partial' },
+      SUBMITTED: { color: 'bg-blue-100 text-blue-800 border-blue-200', label: 'Submitted' },
+      PROCESSING: { color: 'bg-purple-100 text-purple-800 border-purple-200', label: 'Processing' },
+      DENIED: { color: 'bg-gray-100 text-gray-800 border-gray-200', label: 'Denied' },
     }
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.PENDING
@@ -471,7 +487,7 @@ export default function BillingPage() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Pending Amount</CardTitle>
               <svg className="h-4 w-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </CardHeader>
             <CardContent>
@@ -578,7 +594,7 @@ export default function BillingPage() {
                                 <div 
                                   className={`h-2 rounded-full transition-all duration-300 ${
                                     record.status === 'PAID' ? 'bg-green-500' :
-                                    record.status === 'OVERDUE' ? 'bg-red-500' :
+                                    record.status === 'OVERDUE' || record.status === 'DENIED' ? 'bg-red-500' :
                                     'bg-yellow-500'
                                   }`}
                                   style={{ width: `${getPaymentProgress(record)}%` }}
@@ -635,7 +651,7 @@ export default function BillingPage() {
               <CardContent>
                 <div className="space-y-4">
                   {billingRecords
-                    .filter(record => record.status === 'PENDING' || record.status === 'OVERDUE')
+                    .filter(record => record.status !== 'PAID')
                     .map((record) => (
                       <div key={record.id} className="flex items-center justify-between p-4 border rounded-lg">
                         <div className="flex-1">
@@ -671,7 +687,7 @@ export default function BillingPage() {
               <CardContent>
                 <div className="text-center py-8 text-gray-500">
                   <svg className="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                   <p>Advanced reporting dashboard coming soon</p>
                   <p className="text-sm text-gray-400 mt-2">

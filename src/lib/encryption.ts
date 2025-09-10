@@ -1,0 +1,59 @@
+import crypto from 'crypto';
+
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
+const IV_LENGTH = 16;
+
+export function encrypt(text: string): string {
+  if (!text || typeof text !== 'string') return '';
+  
+  try {
+    const iv = crypto.randomBytes(IV_LENGTH);
+    const cipher = crypto.createCipher('aes-256-cbc', ENCRYPTION_KEY);
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return iv.toString('hex') + ':' + encrypted;
+  } catch (error) {
+    console.error('Encryption error:', error);
+    throw new Error('Failed to encrypt data');
+  }
+}
+
+export function decrypt(text: string): string {
+  if (!text || typeof text !== 'string') return '';
+  
+  try {
+    // Check if the text has the expected format (contains ':')
+    if (!text.includes(':')) {
+      // If it doesn't have the expected format, it might be plain text or corrupted
+      // In this case, we'll return it as is to prevent errors
+      console.warn('Decryption warning: Text does not have expected encrypted format, returning as is');
+      return text;
+    }
+    
+    const textParts = text.split(':');
+    if (textParts.length !== 2) {
+      throw new Error('Invalid encrypted text format');
+    }
+    
+    const iv = Buffer.from(textParts[0], 'hex');
+    const encryptedText = textParts[1];
+    const decipher = crypto.createDecipher('aes-256-cbc', ENCRYPTION_KEY);
+    let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+  } catch (error) {
+    console.error('Decryption error:', error);
+    // Instead of throwing an error, we'll return the original text
+    // This prevents the entire API from failing if some records have issues
+    return text;
+  }
+}
+
+// Utility functions for specific PHI fields
+export function encryptPHI(text: string): string {
+  return text && typeof text === 'string' ? encrypt(text) : '';
+}
+
+export function decryptPHI(text: string): string {
+  return text && typeof text === 'string' ? decrypt(text) : '';
+}

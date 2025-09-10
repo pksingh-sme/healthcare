@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyTokenFromRequest } from '@/lib/auth'
+import { logPHIAccess } from '@/lib/audit'
+import { encryptPHI, decryptPHI } from '@/lib/encryption'
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,6 +10,16 @@ export async function GET(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // Log PHI access
+    await logPHIAccess(
+      user.id,
+      'READ',
+      'MedicalRecord',
+      undefined,
+      'View medical records',
+      request
+    );
 
     // Only providers and admins can access medical records
     if (user.role === 'PATIENT') {
@@ -69,9 +81,23 @@ export async function GET(request: NextRequest) {
       },
     })
 
+    // Decrypt sensitive fields with proper error handling
+    const decryptedRecords = records.map(record => ({
+      ...record,
+      notes: record.notes && typeof record.notes === 'string' && record.notes.includes(':') 
+        ? decryptPHI(record.notes) 
+        : record.notes || null,
+      labResults: record.labResults && typeof record.labResults === 'string' && record.labResults.includes(':') 
+        ? decryptPHI(record.labResults) 
+        : record.labResults || null,
+      prescriptions: record.prescriptions && typeof record.prescriptions === 'string' && record.prescriptions.includes(':') 
+        ? decryptPHI(record.prescriptions) 
+        : record.prescriptions || null,
+    }));
+
     return NextResponse.json({
       success: true,
-      data: records,
+      data: decryptedRecords,
     })
   } catch (error) {
     console.error('Error fetching medical records:', error)
@@ -88,6 +114,16 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // Log PHI creation
+    await logPHIAccess(
+      user.id,
+      'CREATE',
+      'MedicalRecord',
+      undefined,
+      'Create medical record',
+      request
+    );
 
     // Only providers and admins can create medical records
     if (user.role === 'PATIENT') {
@@ -166,15 +202,15 @@ export async function POST(request: NextRequest) {
         chiefComplaint: chiefComplaint || undefined,
         diagnosis: diagnosis || undefined,
         treatment: treatment || undefined,
-        notes: notes || undefined,
+        notes: notes ? encryptPHI(notes) : undefined,
         bloodPressureSystolic: bloodPressureSystolic || undefined,
         bloodPressureDiastolic: bloodPressureDiastolic || undefined,
         heartRate: heartRate || undefined,
         temperature: temperature || undefined,
         weight: weight || undefined,
         height: height || undefined,
-        labResults: labResults || undefined,
-        prescriptions: prescriptions || undefined,
+        labResults: labResults ? encryptPHI(labResults) : undefined,
+        prescriptions: prescriptions ? encryptPHI(prescriptions) : undefined,
         readmissionRisk,
         suggestedCodes: suggestedCodes.length > 0 ? suggestedCodes.join('; ') : undefined,
       },
@@ -209,9 +245,23 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Decrypt sensitive fields before sending response with proper error handling
+    const decryptedRecord = {
+      ...record,
+      notes: record.notes && typeof record.notes === 'string' && record.notes.includes(':') 
+        ? decryptPHI(record.notes) 
+        : record.notes || null,
+      labResults: record.labResults && typeof record.labResults === 'string' && record.labResults.includes(':') 
+        ? decryptPHI(record.labResults) 
+        : record.labResults || null,
+      prescriptions: record.prescriptions && typeof record.prescriptions === 'string' && record.prescriptions.includes(':') 
+        ? decryptPHI(record.prescriptions) 
+        : record.prescriptions || null,
+    };
+
     return NextResponse.json({
       success: true,
-      data: record,
+      data: decryptedRecord,
       message: 'Medical record created successfully',
     })
   } catch (error) {
@@ -230,6 +280,16 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Log PHI update
+    await logPHIAccess(
+      user.id,
+      'UPDATE',
+      'MedicalRecord',
+      undefined,
+      'Update medical record',
+      request
+    );
+
     // Only providers and admins can update medical records
     if (user.role === 'PATIENT') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -237,6 +297,17 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json()
     const { recordId, ...updateData } = body
+
+    // Encrypt sensitive fields if provided
+    if (updateData.notes !== undefined) {
+      updateData.notes = updateData.notes ? encryptPHI(updateData.notes) : null;
+    }
+    if (updateData.labResults !== undefined) {
+      updateData.labResults = updateData.labResults ? encryptPHI(updateData.labResults) : null;
+    }
+    if (updateData.prescriptions !== undefined) {
+      updateData.prescriptions = updateData.prescriptions ? encryptPHI(updateData.prescriptions) : null;
+    }
 
     if (!recordId) {
       return NextResponse.json(
@@ -287,9 +358,23 @@ export async function PUT(request: NextRequest) {
       },
     })
 
+    // Decrypt sensitive fields before sending response with proper error handling
+    const decryptedRecord = {
+      ...updatedRecord,
+      notes: updatedRecord.notes && typeof updatedRecord.notes === 'string' && updatedRecord.notes.includes(':') 
+        ? decryptPHI(updatedRecord.notes) 
+        : updatedRecord.notes || null,
+      labResults: updatedRecord.labResults && typeof updatedRecord.labResults === 'string' && updatedRecord.labResults.includes(':') 
+        ? decryptPHI(updatedRecord.labResults) 
+        : updatedRecord.labResults || null,
+      prescriptions: updatedRecord.prescriptions && typeof updatedRecord.prescriptions === 'string' && updatedRecord.prescriptions.includes(':') 
+        ? decryptPHI(updatedRecord.prescriptions) 
+        : updatedRecord.prescriptions || null,
+    };
+
     return NextResponse.json({
       success: true,
-      data: updatedRecord,
+      data: decryptedRecord,
       message: 'Medical record updated successfully',
     })
   } catch (error) {

@@ -91,6 +91,11 @@ Visit `http://localhost:3001` to see the application.
 - **Provider** - Patient management and clinical features
 - **Patient** - Personal health records and communication
 
+### Login details
+- **Admin**: admin@clinicease.ai / admin123!
+- **Providers**: dr.firstname.lastname@clinicease.ai / provider123!
+- **Patients**: patientN@example.com / patient123!
+
 ## 🔒 Security & Compliance
 
 - HIPAA-compliant data handling

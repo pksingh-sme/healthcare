@@ -5,6 +5,8 @@ import { NextRequest } from 'next/server'
 import { prisma } from './prisma'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key'
+// Add session timeout configuration
+const SESSION_TIMEOUT = parseInt(process.env.SESSION_TIMEOUT || '28800', 10); // 8 hours default
 
 export interface JWTPayload {
   userId: string
@@ -43,6 +45,12 @@ export async function verifyTokenFromRequest(request: NextRequest): Promise<Auth
     const token = extractTokenFromHeaders(request.headers)
     if (!token) {
       return null
+    }
+
+    // Validate session
+    const isSessionValid = await validateSession(token, request);
+    if (!isSessionValid) {
+      return null;
     }
 
     const payload = verifyToken(token)
@@ -89,6 +97,75 @@ export async function verifyTokenFromRequest(request: NextRequest): Promise<Auth
   } catch (error) {
     console.error('Error verifying token from request:', error)
     return null
+  }
+}
+
+// Enhanced session creation with security features
+export async function createSession(userId: string, req?: NextRequest): Promise<string> {
+  const token = generateToken({
+    userId,
+    email: '', // Will be populated when verifying
+    role: Role.PATIENT, // Will be populated when verifying
+    firstName: '',
+    lastName: '',
+  });
+
+  await prisma.session.create({
+    data: {
+      userId,
+      token,
+      expiresAt: new Date(Date.now() + SESSION_TIMEOUT * 1000),
+      ipAddress: req?.headers?.get('x-forwarded-for') || req?.headers?.get('x-real-ip') || undefined,
+      userAgent: req?.headers?.get('user-agent') || undefined,
+      lastActivityAt: new Date(),
+    },
+  });
+
+  return token;
+}
+
+// Enhanced session validation with inactivity timeout
+export async function validateSession(token: string, req?: NextRequest): Promise<boolean> {
+  try {
+    const session = await prisma.session.findUnique({
+      where: { token },
+    });
+
+    if (!session || session.expiresAt < new Date()) {
+      return false;
+    }
+
+    // Check for inactivity timeout (30 minutes)
+    const lastActivity = session.lastActivityAt || session.createdAt;
+    const inactivityTime = Date.now() - lastActivity.getTime();
+    if (inactivityTime > 30 * 60 * 1000) { // 30 minutes
+      // Session expired due to inactivity
+      await prisma.session.delete({
+        where: { id: session.id },
+      });
+      return false;
+    }
+
+    // Update last activity
+    await prisma.session.update({
+      where: { id: session.id },
+      data: { lastActivityAt: new Date() },
+    });
+
+    // Check IP address match if available (optional security feature)
+    if (process.env.ENFORCE_IP_BINDING === 'true' && session.ipAddress) {
+      const currentIp = req?.headers?.get('x-forwarded-for') || req?.headers?.get('x-real-ip') || 'unknown';
+      if (session.ipAddress !== currentIp) {
+        // Log suspicious activity
+        console.warn(`IP mismatch detected for session ${session.id}: ${session.ipAddress} vs ${currentIp}`);
+        return false;
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Session validation error:', error);
+    return false;
   }
 }
 
@@ -149,5 +226,5 @@ export function generateTwoFASecret(): string {
 export function verifyTwoFAToken(secret: string, token: string): boolean {
   // Simplified 2FA verification - in production, use proper TOTP library
   // For demo purposes, accept any 6-digit number
-  return /^\\d{6}$/.test(token)
+  return /^\d{6}$/.test(token)
 }

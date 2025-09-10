@@ -18,6 +18,8 @@ interface Contact {
   lastMessageTime?: string
   unreadCount: number
   isOnline: boolean
+  specialty?: string // For providers
+  patientId?: string // For patients
 }
 
 interface Message {
@@ -159,7 +161,19 @@ const MessagingCenter = React.memo(() => {
       
       try {
         setLoading(true)
-        const response = await fetch('/api/users', {
+        let url = '/api/users'
+        
+        // For patients, only fetch providers they have appointments with
+        if (user.role === 'PATIENT' && user.patient?.id) {
+          url = `/api/users?role=PROVIDER&patientId=${user.patient.id}`
+        } 
+        // For providers, fetch patients they have appointments with and other providers
+        else if (user.role === 'PROVIDER') {
+          url = `/api/users?providersAndPatients=true&providerId=${user.provider?.id}`
+        }
+        // Admins can see everyone (no additional filtering)
+        
+        const response = await fetch(url, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -176,7 +190,7 @@ const MessagingCenter = React.memo(() => {
             // Patients should only see providers (doctors and nurses)
             filteredUsers = filteredUsers.filter((u: any) => u.role === 'PROVIDER')
           } else if (user.role === 'PROVIDER') {
-            // Providers should see patients and other providers, but not admins
+            // Providers should see patients they have appointments with and other providers
             filteredUsers = filteredUsers.filter((u: any) => 
               u.role === 'PATIENT' || u.role === 'PROVIDER'
             )
@@ -193,6 +207,8 @@ const MessagingCenter = React.memo(() => {
               lastMessageTime: '',
               unreadCount: 0,
               isOnline: onlineUsers.some(online => online.id === u.id),
+              specialty: u.role === 'PROVIDER' ? u.provider?.specialty : undefined,
+              patientId: u.role === 'PATIENT' ? u.patient?.id : undefined,
             }))
           
           setContacts(formattedContacts)
@@ -248,7 +264,8 @@ const MessagingCenter = React.memo(() => {
 
   const filteredContacts = useMemo(() => {
     return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(searchTerm.toLowerCase())
+      contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (contact.specialty && contact.specialty.toLowerCase().includes(searchTerm.toLowerCase()))
     )
   }, [contacts, searchTerm])
 
@@ -416,7 +433,7 @@ const MessagingCenter = React.memo(() => {
                     {selectedContact.name}
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {selectedContact.role} • {selectedContact.isOnline ? 'Online' : 'Offline'}
+                    {selectedContact.role} {selectedContact.specialty && `• ${selectedContact.specialty}`} • {selectedContact.isOnline ? 'Online' : 'Offline'}
                   </p>
                 </div>
               </div>

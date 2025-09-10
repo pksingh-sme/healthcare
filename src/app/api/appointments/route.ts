@@ -15,6 +15,8 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('endDate')
     const providerId = searchParams.get('providerId')
     const patientId = searchParams.get('patientId')
+    const today = searchParams.get('today')
+    const limit = searchParams.get('limit')
 
     const whereClause: {
       patientId?: string
@@ -41,6 +43,17 @@ export async function GET(request: NextRequest) {
         gte: new Date(startDate),
         lte: new Date(endDate),
       }
+    } else if (today === 'true') {
+      // Filter for today's appointments
+      const todayStart = new Date()
+      todayStart.setHours(0, 0, 0, 0)
+      const todayEnd = new Date()
+      todayEnd.setHours(23, 59, 59, 999)
+      
+      whereClause.startTime = {
+        gte: todayStart,
+        lte: todayEnd,
+      }
     }
 
     // Additional filters
@@ -51,7 +64,8 @@ export async function GET(request: NextRequest) {
       whereClause.patientId = patientId
     }
 
-    const appointments = await prisma.appointment.findMany({
+    // Build query options
+    const queryOptions: any = {
       where: whereClause,
       include: {
         patient: {
@@ -81,7 +95,17 @@ export async function GET(request: NextRequest) {
       orderBy: {
         startTime: 'asc',
       },
-    })
+    }
+
+    // Apply limit if provided
+    if (limit) {
+      const limitNum = parseInt(limit, 10)
+      if (!isNaN(limitNum) && limitNum > 0) {
+        queryOptions.take = limitNum
+      }
+    }
+
+    const appointments = await prisma.appointment.findMany(queryOptions)
 
     return NextResponse.json({
       success: true,

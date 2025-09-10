@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
-import { verifyPassword, generateToken } from '@/lib/auth'
+import { verifyPassword, generateToken, createSession } from '@/lib/auth'
 import { successResponse, errorResponse, handleApiError } from '@/lib/api'
 
 const LoginSchema = z.object({
@@ -50,23 +50,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Generate JWT token
-    const token = generateToken({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-      firstName: user.firstName,
-      lastName: user.lastName,
-    })
-
-    // Create session
-    await prisma.session.create({
-      data: {
-        userId: user.id,
-        token,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      },
-    })
+    // Create enhanced session with security features
+    const token = await createSession(user.id, request);
 
     // Return user data without password
     const userData = {

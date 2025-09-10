@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyTokenFromRequest } from '@/lib/auth'
+import { logPHIAccess } from '@/lib/audit'
+import { encryptPHI, decryptPHI } from '@/lib/encryption'
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,6 +14,16 @@ export async function GET(request: NextRequest) {
     if (user.role !== 'PATIENT') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
+
+    // Log PHI access
+    await logPHIAccess(
+      user.id, 
+      'READ', 
+      'PatientProfile', 
+      user.patient?.id, 
+      'View patient profile', 
+      request
+    )
 
     const patient = await prisma.patient.findUnique({
       where: { userId: user.id },
@@ -31,6 +43,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Patient profile not found' }, { status: 404 })
     }
 
+    // Decrypt sensitive fields before sending to client
     return NextResponse.json({
       success: true,
       data: {
@@ -45,9 +58,9 @@ export async function GET(request: NextRequest) {
         emergencyPhone: patient.emergencyPhone,
         insuranceType: patient.insuranceType,
         insuranceProvider: patient.insuranceProvider,
-        allergies: patient.allergies,
-        medications: patient.medications,
-        medicalHistory: patient.medicalHistory,
+        allergies: patient.allergies ? decryptPHI(patient.allergies) : null,
+        medications: patient.medications ? decryptPHI(patient.medications) : null,
+        medicalHistory: patient.medicalHistory ? decryptPHI(patient.medicalHistory) : null,
         user: patient.user,
       },
     })
@@ -70,6 +83,16 @@ export async function PUT(request: NextRequest) {
     if (user.role !== 'PATIENT') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
+
+    // Log PHI modification
+    await logPHIAccess(
+      user.id, 
+      'UPDATE', 
+      'PatientProfile', 
+      user.patient?.id, 
+      'Update patient profile', 
+      request
+    )
 
     const body = await request.json()
     const {
@@ -96,8 +119,8 @@ export async function PUT(request: NextRequest) {
         ...(zipCode && { zipCode }),
         ...(emergencyContact && { emergencyContact }),
         ...(emergencyPhone && { emergencyPhone }),
-        ...(allergies !== undefined && { allergies }),
-        ...(medications !== undefined && { medications }),
+        ...(allergies !== undefined && { allergies: allergies ? encryptPHI(allergies) : null }),
+        ...(medications !== undefined && { medications: medications ? encryptPHI(medications) : null }),
       },
       include: {
         user: {
@@ -125,8 +148,8 @@ export async function PUT(request: NextRequest) {
         emergencyPhone: updatedPatient.emergencyPhone,
         insuranceType: updatedPatient.insuranceType,
         insuranceProvider: updatedPatient.insuranceProvider,
-        allergies: updatedPatient.allergies,
-        medications: updatedPatient.medications,
+        allergies: updatedPatient.allergies ? decryptPHI(updatedPatient.allergies) : null,
+        medications: updatedPatient.medications ? decryptPHI(updatedPatient.medications) : null,
         user: updatedPatient.user,
       },
       message: 'Profile updated successfully',

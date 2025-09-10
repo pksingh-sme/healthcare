@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyTokenFromRequest } from '@/lib/auth'
+import { logPHIAccess } from '@/lib/audit'
+import { encryptPHI, decryptPHI } from '@/lib/encryption'
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,6 +11,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Log PHI access for messaging
+    await logPHIAccess(
+      user.id,
+      'READ',
+      'Message',
+      undefined,
+      'View messages',
+      request
+    );
 
     const { searchParams } = new URL(request.url)
     const contactId = searchParams.get('contactId')
@@ -81,11 +92,11 @@ export async function GET(request: NextRequest) {
       })
     }
 
-
     // Transform messages to include proper structure for frontend
+    // Decrypt message content
     const transformedMessages = messages.map((msg) => ({
       id: msg.id,
-      content: msg.content,
+      content: decryptPHI(msg.content),
       senderId: msg.senderId,
       receiverId: msg.receiverId,
       senderName: `${msg.sender.firstName} ${msg.sender.lastName}`,
@@ -115,6 +126,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Log PHI creation for messaging
+    await logPHIAccess(
+      user.id,
+      'CREATE',
+      'Message',
+      undefined,
+      'Send message',
+      request
+    );
 
     const body = await request.json()
     const { content, receiverId } = body
@@ -167,13 +187,12 @@ export async function POST(request: NextRequest) {
     }
 
     const messageData = {
-      content: content.trim(),
+      content: encryptPHI(content.trim()),
       senderId: user.id,
       receiverId: receiverId,
       patientId: patientId,
       isRead: false,
     }
-
 
     const message = await prisma.message.create({
       data: messageData,
@@ -205,10 +224,15 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Decrypt content for response
+    const decryptedMessage = {
+      ...message,
+      content: decryptPHI(message.content),
+    };
 
     return NextResponse.json({
       success: true,
-      data: message,
+      data: decryptedMessage,
       message: 'Message sent successfully',
     })
   } catch (error: any) {
@@ -228,6 +252,16 @@ export async function PATCH(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // Log PHI update for messaging
+    await logPHIAccess(
+      user.id,
+      'UPDATE',
+      'Message',
+      undefined,
+      'Update message status',
+      request
+    );
 
     const body = await request.json()
     const { messageId, isRead } = body
