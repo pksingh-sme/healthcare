@@ -67,7 +67,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
         setIsConnected(false)
       }
       
-      const socketInstance = io('http://localhost:3001', {
+      const socketInstance = io({
         path: '/api/socket',
         addTrailingSlash: false,
         forceNew: false, // Don't force new connections unnecessarily
