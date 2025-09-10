@@ -384,47 +384,47 @@ export default function PatientsPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>First Name</Label>
-                      <div className="p-2 border rounded bg-gray-50">{selectedPatient.user.firstName}</div>
+                      <div className="p-2 border rounded bg-gray-100 dark:bg-gray-700">{selectedPatient.user.firstName}</div>
                     </div>
                     
                     <div>
                       <Label>Last Name</Label>
-                      <div className="p-2 border rounded bg-gray-50">{selectedPatient.user.lastName}</div>
+                      <div className="p-2 border rounded bg-gray-100 dark:bg-gray-700">{selectedPatient.user.lastName}</div>
                     </div>
                     
                     <div>
                       <Label>Email</Label>
-                      <div className="p-2 border rounded bg-gray-50">{selectedPatient.user.email}</div>
+                      <div className="p-2 border rounded bg-gray-100 dark:bg-gray-700">{selectedPatient.user.email}</div>
                     </div>
                     
                     <div>
                       <Label>Phone</Label>
-                      <div className="p-2 border rounded bg-gray-50">{selectedPatient.user.phone || 'Not provided'}</div>
+                      <div className="p-2 border rounded bg-gray-100 dark:bg-gray-700">{selectedPatient.user.phone || 'Not provided'}</div>
                     </div>
                     
                     <div>
                       <Label>Date of Birth</Label>
-                      <div className="p-2 border rounded bg-gray-50">{formatDate(selectedPatient.dateOfBirth)}</div>
+                      <div className="p-2 border rounded bg-gray-100 dark:bg-gray-700">{formatDate(selectedPatient.dateOfBirth)}</div>
                     </div>
                     
                     <div>
                       <Label>Age</Label>
-                      <div className="p-2 border rounded bg-gray-50">{getAge(selectedPatient.dateOfBirth)} years</div>
+                      <div className="p-2 border rounded bg-gray-100 dark:bg-gray-700">{getAge(selectedPatient.dateOfBirth)} years</div>
                     </div>
                     
                     <div>
                       <Label>Insurance Type</Label>
-                      <div className="p-2 border rounded bg-gray-50">{selectedPatient.insuranceType || 'Not provided'}</div>
+                      <div className="p-2 border rounded bg-gray-100 dark:bg-gray-700">{selectedPatient.insuranceType || 'Not provided'}</div>
                     </div>
                     
                     <div>
                       <Label>Insurance Provider</Label>
-                      <div className="p-2 border rounded bg-gray-50">{selectedPatient.insuranceProvider || 'Not provided'}</div>
+                      <div className="p-2 border rounded bg-gray-100 dark:bg-gray-700">{selectedPatient.insuranceProvider || 'Not provided'}</div>
                     </div>
                     
                     <div>
                       <Label>Emergency Contact</Label>
-                      <div className="p-2 border rounded bg-gray-50">{selectedPatient.emergencyContact || 'Not provided'}</div>
+                      <div className="p-2 border rounded bg-gray-100 dark:bg-gray-700">{selectedPatient.emergencyContact || 'Not provided'}</div>
                     </div>
                   </div>
                 </div>

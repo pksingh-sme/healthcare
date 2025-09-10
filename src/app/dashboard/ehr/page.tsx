@@ -492,7 +492,7 @@ export default function EHRPage() {
                           {formatVitals(record) && (
                             <div>
                               <h4 className="font-medium text-sm text-gray-700 mb-1">Vital Signs</h4>
-                              <p className="text-sm bg-gray-50 p-2 rounded">{formatVitals(record)}</p>
+                              <p className="text-sm bg-gray-100 dark:bg-gray-700 p-2 rounded">{formatVitals(record)}</p>
                             </div>
                           )}
 
@@ -508,7 +508,7 @@ export default function EHRPage() {
                           {record.prescriptions && (
                             <div>
                               <h4 className="font-medium text-sm text-gray-700 mb-1">Prescriptions</h4>
-                              <p className="text-sm bg-blue-50 p-2 rounded">{record.prescriptions}</p>
+                              <p className="text-sm bg-blue-50 dark:bg-blue-900/50 p-2 rounded">{record.prescriptions}</p>
                             </div>
                           )}
 
@@ -516,7 +516,7 @@ export default function EHRPage() {
                           {record.labResults && (
                             <div>
                               <h4 className="font-medium text-sm text-gray-700 mb-1">Lab Results</h4>
-                              <p className="text-sm bg-green-50 p-2 rounded">{record.labResults}</p>
+                              <p className="text-sm bg-green-50 dark:bg-green-900/50 p-2 rounded">{record.labResults}</p>
                             </div>
                           )}
 
@@ -532,7 +532,7 @@ export default function EHRPage() {
                           {record.suggestedCodes && (
                             <div>
                               <h4 className="font-medium text-sm text-gray-700 mb-1">AI Suggested Codes</h4>
-                              <p className="text-sm bg-purple-50 p-2 rounded">{record.suggestedCodes}</p>
+                              <p className="text-sm bg-purple-50 dark:bg-purple-900/50 p-2 rounded">{record.suggestedCodes}</p>
                             </div>
                           )}
 
@@ -607,7 +607,7 @@ export default function EHRPage() {
                       <div className="text-2xl font-bold text-red-600">
                         {records.filter(r => r.readmissionRisk >= 0.7).length}
                       </div>
-                      <p className="text-xs text-gray-500">Requiring immediate attention</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Requiring immediate attention</p>
                     </CardContent>
                   </Card>
 
@@ -621,7 +621,7 @@ export default function EHRPage() {
                           ? Math.round((records.reduce((acc, r) => acc + r.readmissionRisk, 0) / records.length) * 100)
                           : 0}%
                       </div>
-                      <p className="text-xs text-gray-500">Across all patients</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Across all patients</p>
                     </CardContent>
                   </Card>
 
@@ -633,7 +633,7 @@ export default function EHRPage() {
                       <div className="text-2xl font-bold text-blue-600">
                         {records.length}
                       </div>
-                      <p className="text-xs text-gray-500">Medical records managed</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Medical records managed</p>
                     </CardContent>
                   </Card>
                 </div>
@@ -643,13 +643,13 @@ export default function EHRPage() {
                   <div className="space-y-3">
                     <div className="p-3 bg-yellow-50 border border-yellow-200 rounded">
                       <p className="text-sm font-medium text-yellow-800">Population Health Alert</p>
-                      <p className="text-sm text-yellow-700">
+                      <p className="text-sm text-yellow-700 dark:text-yellow-200">
                         {records.filter(r => r.readmissionRisk >= 0.7).length} patients show high readmission risk. Consider preventive care interventions.
                       </p>
                     </div>
                     <div className="p-3 bg-blue-50 border border-blue-200 rounded">
                       <p className="text-sm font-medium text-blue-800">Coding Optimization</p>
-                      <p className="text-sm text-blue-700">
+                      <p className="text-sm text-blue-700 dark:text-blue-200">
                         AI has suggested improved ICD-10 codes for {Math.floor(records.length * 0.3)} recent records to optimize billing accuracy.
                       </p>
                     </div>
@@ -682,7 +682,7 @@ export default function EHRPage() {
                         <CardTitle className="text-sm">{template.name}</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-xs text-gray-500 mb-3">{template.description}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">{template.description}</p>
                         <Button variant="outline" size="sm" className="w-full">
                           Use Template
                         </Button>
@@ -952,13 +952,13 @@ export default function EHRPage() {
               <CardContent className="space-y-4">
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                   <h4 className="font-medium text-blue-900 mb-2">Patient Information</h4>
-                  <p className="text-sm text-blue-700">
+                  <p className="text-sm text-blue-700 dark:text-blue-200">
                     <strong>Name:</strong> {shareRecord.patient.user.firstName} {shareRecord.patient.user.lastName}
                   </p>
-                  <p className="text-sm text-blue-700">
+                  <p className="text-sm text-blue-700 dark:text-blue-200">
                     <strong>Email:</strong> {shareRecord.patient.user.email}
                   </p>
-                  <p className="text-sm text-blue-700 mt-2">
+                  <p className="text-sm text-blue-700 dark:text-blue-200 mt-2">
                     <strong>Record Date:</strong> {new Date(shareRecord.createdAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -969,8 +969,8 @@ export default function EHRPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
                     <div>
-                      <p className="text-sm font-medium text-yellow-800">Important Notice</p>
-                      <p className="text-xs text-yellow-700 mt-1">
+                      <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Important Notice</p>
+                      <p className="text-xs text-yellow-700 dark:text-yellow-200 mt-1">
                         The patient will receive a secure link to view their medical record. 
                         The shared information will be accessible for 30 days.
                       </p>
