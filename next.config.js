@@ -3,9 +3,6 @@ const nextConfig = {
   // Enable React strict mode for better development experience
   reactStrictMode: true,
   
-  // Enable SWC minification for better performance
-  swcMinify: true,
-  
   // Optimize images
   images: {
     domains: ['localhost', 'your-domain.vercel.app'],
@@ -14,8 +11,6 @@ const nextConfig = {
   
   // Development optimizations
   ...(process.env.NODE_ENV === 'development' && {
-    // Faster development builds
-    optimizeFonts: false,
     // Optimize module resolution
     webpack: (config, { dev, isServer }) => {
       if (dev && !isServer) {
@@ -40,10 +35,7 @@ const nextConfig = {
   // Production optimizations
   ...(process.env.NODE_ENV === 'production' && {
     // Enable experimental features for better performance
-    experimental: {
-      // Server components
-      serverComponentsExternalPackages: ['prisma', '@prisma/client'],
-    },
+    serverExternalPackages: ['prisma', '@prisma/client'],
   }),
   
   // Security headers
