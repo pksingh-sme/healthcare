@@ -99,9 +99,12 @@ export default function SocketHandler(
       cors: {
         origin: process.env.NODE_ENV === 'production' 
           ? process.env.NEXTAUTH_URL 
-          : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003'],
+          : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3005', 'http://10.0.0.141:3005'],
         methods: ['GET', 'POST'],
+        credentials: true
       },
+      allowEIO3: true, // Allow Engine.IO v3 clients
+      transports: ['websocket', 'polling'], // Explicitly set transports
     })
     
     res.socket.server.io = io
@@ -109,14 +112,14 @@ export default function SocketHandler(
     // Authentication middleware
     io.use(async (socket: any, next) => {
       try {
-        const token = socket.handshake.auth.token
+        const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(' ')[1]
         if (!token) {
-          return next(new Error('Authentication error'))
+          return next(new Error('Authentication error: No token provided'))
         }
 
         const payload = verifyToken(token)
         if (!payload) {
-          return next(new Error('Invalid token'))
+          return next(new Error('Authentication error: Invalid token'))
         }
 
         // Get user info from database
@@ -127,11 +130,12 @@ export default function SocketHandler(
             firstName: true,
             lastName: true,
             role: true,
+            isActive: true,
           },
         })
 
-        if (!user) {
-          return next(new Error('User not found'))
+        if (!user || !user.isActive) {
+          return next(new Error('Authentication error: User not found or inactive'))
         }
 
         socket.userId = user.id
@@ -141,7 +145,7 @@ export default function SocketHandler(
         next()
       } catch (error) {
         console.error('Socket authentication error:', error)
-        next(new Error('Authentication error'))
+        next(new Error('Authentication error: ' + (error instanceof Error ? error.message : 'Unknown error')))
       }
     })
 
