@@ -67,16 +67,21 @@ export function SocketProvider({ children }: SocketProviderProps) {
         setIsConnected(false)
       }
       
-      const socketInstance = io('http://localhost:3001', {
+      const socketUrl = process.env.NEXTAUTH_URL || 'http://localhost:3005'
+      console.log('Attempting to connect to Socket.IO server at:', socketUrl)
+      
+      const socketInstance = io(socketUrl, {
         path: '/api/socket',
         addTrailingSlash: false,
-        forceNew: false, // Don't force new connections unnecessarily
+        forceNew: true,
         reconnection: true,
-        reconnectionDelay: 2000,
-        reconnectionAttempts: 3,
-        timeout: 10000, // Reduced timeout
-        transports: ['polling'], // Use only polling to prevent websocket issues
-        upgrade: false, // Prevent transport upgrades
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 10,
+        timeout: 10000,
+        transports: ['polling', 'websocket'], // Try polling first, then websocket
+        upgrade: false, // Disable upgrade to prevent websocket errors
+        rememberUpgrade: false,
         auth: {
           token: token,
         },
@@ -85,6 +90,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
       setSocket(socketInstance)
 
       socketInstance.on('connect', () => {
+        console.log('Socket.IO connected successfully with ID:', socketInstance.id)
         setIsConnected(true)
         
         // Add current user to online list immediately
@@ -101,18 +107,25 @@ export function SocketProvider({ children }: SocketProviderProps) {
       })
 
       socketInstance.on('disconnect', (reason) => {
+        console.log('Socket.IO disconnected. Reason:', reason)
         setIsConnected(false)
         
         // Only clear online users if it's a permanent disconnect
         if (reason === 'io server disconnect' || reason === 'transport close') {
           setOnlineUsers([])
-        } else {
         }
       })
 
       socketInstance.on('connect_error', (error) => {
         console.error('Socket connection error:', error)
+        console.error('Error code:', error.code)
+        console.error('Error message:', error.message)
+        console.error('Error description:', error.description)
         setIsConnected(false)
+      })
+      
+      socketInstance.on('error', (error) => {
+        console.error('Socket error:', error)
       })
 
       socketInstance.on('newMessage', (message: Message) => {
