@@ -1,0 +1,36 @@
+# Dependencies
+node_modules
+
+# Build outputs
+.next
+out
+
+# Environment files
+.env*.local
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Git files
+.git
+.gitignore
+
+# Log files
+*.log
+
+# Testing
+coverage
+.nyc_output
+
+# Docker
+Dockerfile*
+docker-compose*
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

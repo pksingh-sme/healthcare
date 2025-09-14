@@ -140,7 +140,7 @@ async function main() {
         description: `Appointment for ${patient.user.firstName} ${patient.user.lastName}`,
         startTime,
         endTime,
-        status: appointmentStatuses[i % appointmentStatuses.length],
+        status: appointmentStatuses[i % appointmentStatuses.length] as any,
         type: appointmentTypes[i % appointmentTypes.length],
         noShowProbability: Math.random(),
         riskFactors: i % 5 === 0 ? 'High blood pressure' : i % 5 === 1 ? 'Diabetes' : null,
@@ -215,7 +215,7 @@ async function main() {
         total: (100 + (i * 10)) * 1.08,
         insuranceBilled: (100 + (i * 10)) * 0.8,
         patientResponsibility: (100 + (i * 10)) * 0.2,
-        status: billingStatuses[i % billingStatuses.length],
+        status: billingStatuses[i % billingStatuses.length] as any,
         paymentMethod: i % 3 === 0 ? 'Credit Card' : i % 3 === 1 ? 'Insurance' : 'Cash',
         paymentDate: i % 2 === 0 ? new Date() : null,
         paidAmount: i % 2 === 0 ? (100 + (i * 10)) * 1.08 : 0,
@@ -260,7 +260,7 @@ async function main() {
         message: `I would like to request a demo for ${roles[i % roles.length]} role.`,
         preferredDate: new Date(Date.now() + (i * 24 * 60 * 60 * 1000)),
         preferredTime: `${9 + (i % 8)}:00 AM`,
-        status: demoStatuses[i % demoStatuses.length],
+        status: demoStatuses[i % demoStatuses.length] as any,
       },
     })
   }
