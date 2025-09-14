@@ -164,7 +164,7 @@ export default function AboutPage() {
                   />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">Aanchal Suri</h3>
-                <p className="text-purple-600 dark:text-purple-400 mb-2">Chief Sales Officer</p>
+                <p className="text-purple-600 dark:text-purple-400 mb-2">Head of Growth</p>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
                   Experienced in healthcare sales and client relationship management
                 </p>

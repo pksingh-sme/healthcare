@@ -52,19 +52,19 @@ export default function Home() {
   // Healthcare-related images for the carousel
   const heroImages = [
     {
-      url: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2053&q=80",
+      url: "./images/banners/banner1.png",
       alt: "Modern healthcare facility with advanced medical equipment"
     },
     {
-      url: "https://images.unsplash.com/photo-1516549655169-df83a0774514?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
+      url: "./images/banners/banner2.png",
       alt: "Doctor using digital tablet for patient records"
     },
     {
-      url: "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1932&q=80",
+      url: "./images/banners/banner3.png",
       alt: "Healthcare professionals in a modern clinic"
     },
     {
-      url: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+      url: "./images/banners/banner4.png",
       alt: "Patient receiving care in a medical facility"
     }
   ]
