@@ -97,9 +97,6 @@ const nextConfig = {
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
   },
   
-  // Output configuration for Vercel
-  output: 'standalone',
-  
   // Disable powered by header for security
   poweredByHeader: false,
   

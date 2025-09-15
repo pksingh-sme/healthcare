@@ -7,6 +7,9 @@ export async function GET() {
   return NextResponse.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    service: 'ClinicEase AI Healthcare Management System by Clinch Infosystems'
+    service: 'ClinicEase AI Healthcare Management System by Clinch Infosystems',
+    environment: process.env.NODE_ENV,
+    vercel: process.env.VERCEL ? 'true' : 'false',
+    vercelEnv: process.env.VERCEL_ENV || 'not set'
   })
 }

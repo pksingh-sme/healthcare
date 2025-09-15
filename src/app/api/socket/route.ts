@@ -33,6 +33,24 @@ const verifyToken = (token: string) => {
 };
 
 export async function GET(request: NextRequest) {
+  // Check if we're running on Vercel (serverless environment)
+  const isVercel = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' || 
+                  process.env.VERCEL_ENV === 'production';
+  
+  // If we're on Vercel, return a simple response instead of trying to initialize Socket.IO
+  if (isVercel) {
+    return new Response(JSON.stringify({
+      message: 'Socket.IO is not available in Vercel serverless environment',
+      status: 'disabled',
+      note: 'Real-time features are disabled in this deployment environment'
+    }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  }
+  
   // This is a placeholder for the Socket.IO endpoint
   // Vercel Serverless Functions don't support long-running connections like Socket.IO
   // For production deployment, consider using a separate Socket.IO server or a service like Pusher

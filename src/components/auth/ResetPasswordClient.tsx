@@ -19,7 +19,14 @@ export default function ResetPasswordClient() {
   const [token, setToken] = useState('')
   
   const router = useRouter()
-  const searchParams = useSearchParams()
+  
+  // Safely handle useSearchParams
+  let searchParams;
+  try {
+    searchParams = useSearchParams()
+  } catch (e) {
+    searchParams = null
+  }
 
   useEffect(() => {
     const tokenParam = searchParams?.get('token')

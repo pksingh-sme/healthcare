@@ -20,8 +20,16 @@ export default function LoginClient() {
   const [showTwoFA, setShowTwoFA] = useState(false)
   const { login, user, error: authError } = useAuth()
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const roleFromQuery = searchParams?.get('role')
+  
+  // Safely handle useSearchParams
+  let searchParams;
+  try {
+    searchParams = useSearchParams()
+  } catch (e) {
+    searchParams = null
+  }
+  
+  const roleFromQuery = searchParams?.get('role') || null
 
   useEffect(() => {
     if (user) {

@@ -60,8 +60,16 @@ export default function RegisterClient() {
   const [activeTab, setActiveTab] = useState('patient')
   const { register, user } = useAuth()
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const roleFromQuery = searchParams?.get('role')
+  
+  // Safely handle useSearchParams
+  let searchParams;
+  try {
+    searchParams = useSearchParams()
+  } catch (e) {
+    searchParams = null
+  }
+  
+  const roleFromQuery = searchParams?.get('role') || null
 
   useEffect(() => {
     if (roleFromQuery) {

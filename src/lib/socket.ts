@@ -91,6 +91,19 @@ export default function SocketHandler(
   req: NextApiRequest,
   res: NextApiResponseServerIO
 ) {
+  // Check if we're running on Vercel (serverless environment)
+  const isVercel = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' || 
+                  process.env.VERCEL_ENV === 'production'
+  
+  // If we're on Vercel, return a simple response instead of trying to initialize Socket.IO
+  if (isVercel) {
+    res.status(200).json({ 
+      message: 'Socket.IO is not available in Vercel serverless environment',
+      status: 'disabled'
+    })
+    return
+  }
+
   if (res.socket.server.io) {
   } else {
     const io = new ServerIO(res.socket.server, {

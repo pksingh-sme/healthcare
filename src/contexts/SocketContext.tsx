@@ -58,6 +58,18 @@ export function SocketProvider({ children }: SocketProviderProps) {
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([])
 
   useEffect(() => {
+    // Check if we're running on Vercel (serverless environment)
+    // Using both NEXT_PUBLIC_VERCEL_ENV and VERCEL_ENV to ensure compatibility
+    const isVercel = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' || 
+                    process.env.VERCEL_ENV === 'production' ||
+                    typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
+    
+    // If we're on Vercel, don't initialize Socket.IO as it's not supported
+    if (isVercel) {
+      console.warn('Socket.IO is not supported on Vercel serverless functions. Real-time features will be disabled.')
+      return
+    }
+
     if (user && token) {
       
       // Cleanup any existing connection first
