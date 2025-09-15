@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyTokenFromRequest } from '@/lib/auth'
-import { Role } from '@prisma/client'
+import { Role, InsuranceType } from '@prisma/client'
 import { z } from 'zod'
 
 const updatePatientSchema = z.object({
@@ -17,7 +17,7 @@ const updatePatientSchema = z.object({
   zipCode: z.string().optional(),
   emergencyContact: z.string().optional(),
   emergencyPhone: z.string().optional(),
-  insuranceType: z.string().optional(),
+  insuranceType: z.enum(['PRIVATE', 'MEDICARE', 'MEDICAID', 'SELF_PAY', 'OTHER']).optional(),
   insuranceProvider: z.string().optional(),
 })
 
@@ -75,7 +75,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
           ...(validatedData.zipCode !== undefined && { zipCode: validatedData.zipCode }),
           ...(validatedData.emergencyContact !== undefined && { emergencyContact: validatedData.emergencyContact }),
           ...(validatedData.emergencyPhone !== undefined && { emergencyPhone: validatedData.emergencyPhone }),
-          ...(validatedData.insuranceType !== undefined && { insuranceType: validatedData.insuranceType }),
+          ...(validatedData.insuranceType !== undefined && { insuranceType: validatedData.insuranceType as any }),
           ...(validatedData.insuranceProvider !== undefined && { insuranceProvider: validatedData.insuranceProvider }),
         },
       })

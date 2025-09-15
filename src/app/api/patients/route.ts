@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyTokenFromRequest } from '@/lib/auth'
-import { Role } from '@prisma/client'
+import { Role, InsuranceType } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
@@ -18,9 +18,26 @@ const createPatientSchema = z.object({
   zipCode: z.string().optional(),
   emergencyContact: z.string().optional(),
   emergencyPhone: z.string().optional(),
-  insuranceType: z.string().optional(),
+  insuranceType: z.enum(['PRIVATE', 'MEDICARE', 'MEDICAID', 'SELF_PAY', 'OTHER']).optional(),
   insuranceProvider: z.string().optional(),
   password: z.string().min(6, 'Password must be at least 6 characters'),
+})
+
+const updatePatientSchema = z.object({
+  firstName: z.string().min(1, 'First name is required').optional(),
+  lastName: z.string().min(1, 'Last name is required').optional(),
+  email: z.string().email('Invalid email format').optional(),
+  phone: z.string().optional(),
+  dateOfBirth: z.string().min(1, 'Date of birth is required').optional(),
+  gender: z.string().optional(),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zipCode: z.string().optional(),
+  emergencyContact: z.string().optional(),
+  emergencyPhone: z.string().optional(),
+  insuranceType: z.enum(['PRIVATE', 'MEDICARE', 'MEDICAID', 'SELF_PAY', 'OTHER']).optional(),
+  insuranceProvider: z.string().optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -77,8 +94,9 @@ export async function POST(request: NextRequest) {
           zipCode: validatedData.zipCode,
           emergencyContact: validatedData.emergencyContact,
           emergencyPhone: validatedData.emergencyPhone,
-          insuranceType: validatedData.insuranceType || 'SELF_PAY',
+          insuranceType: validatedData.insuranceType ? InsuranceType[validatedData.insuranceType as keyof typeof InsuranceType] : InsuranceType.SELF_PAY,
           insuranceProvider: validatedData.insuranceProvider,
+
         },
       })
 
@@ -178,8 +196,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
           ...(validatedData.zipCode !== undefined && { zipCode: validatedData.zipCode }),
           ...(validatedData.emergencyContact !== undefined && { emergencyContact: validatedData.emergencyContact }),
           ...(validatedData.emergencyPhone !== undefined && { emergencyPhone: validatedData.emergencyPhone }),
-          ...(validatedData.insuranceType !== undefined && { insuranceType: validatedData.insuranceType }),
+          ...(validatedData.insuranceType !== undefined && { insuranceType: InsuranceType[validatedData.insuranceType as keyof typeof InsuranceType] }),
           ...(validatedData.insuranceProvider !== undefined && { insuranceProvider: validatedData.insuranceProvider }),
+
         },
       })
 

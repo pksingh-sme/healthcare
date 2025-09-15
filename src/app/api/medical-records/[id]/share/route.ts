@@ -93,7 +93,7 @@ export async function POST(
       providerName: `Dr. ${record.provider.user.firstName} ${record.provider.user.lastName}`,
       shareToken,
       message,
-      recordDate: record.createdAt,
+      recordDate: record.createdAt.toISOString(), // Convert Date to string
     })
 
     // Log the email content for testing purposes
@@ -151,6 +151,8 @@ function generateShareEmailContent({
   message: string
   recordDate: string
 }): string {
+  // Parse the ISO string date
+  const dateObj = new Date(recordDate);
   return `
 Subject: Medical Record Shared - ${providerName}
 
@@ -158,7 +160,7 @@ Dear ${patientName},
 
 ${message}
 
-Your healthcare provider, ${providerName}, has shared your medical record from ${new Date(recordDate).toLocaleDateString()} with you.
+Your healthcare provider, ${providerName}, has shared your medical record from ${dateObj.toLocaleDateString()} with you.
 
 You can access your record securely using the following link:
 ${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/shared-records/${shareToken}

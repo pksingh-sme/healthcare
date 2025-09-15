@@ -3,7 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { verifyTokenFromRequest } from '@/lib/auth'
 import { formatSimpleProviderName } from '@/lib/format'
 import { logPHIAccess } from '@/lib/audit'
-import { jsPDF } from 'jspdf'
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable'; // Import autotable plugin if needed
 
 export async function POST(
   request: NextRequest,
