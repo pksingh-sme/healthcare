@@ -14,7 +14,7 @@ This guide explains how to deploy the ClinicEase AI Healthcare Management System
 
 ### Step 1: Prepare Your Repository
 
-1. Ensure all code changes are committed and pushed to your repository
+1. Ensure all code changes are committed and pushed to your repository 
 2. Remove any sensitive files from the repository (use `.gitignore`)
 3. Verify that the following files exist in your repository:
    - `package.json`
