@@ -5,6 +5,9 @@ import { hashPassword, generateToken } from '@/lib/auth'
 import { successResponse, errorResponse, handleApiError } from '@/lib/api'
 import { Role } from '@prisma/client'
 
+// Make this route dynamic to prevent static generation issues
+export const dynamic = 'force-dynamic'
+
 const RegisterSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(8, 'Password must be at least 8 characters'),

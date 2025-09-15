@@ -6,6 +6,9 @@ import { logPHIAccess } from '@/lib/audit'
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable'; // Import autotable plugin if needed
 
+// Make this route dynamic to prevent static generation issues
+export const dynamic = 'force-dynamic'
+
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }

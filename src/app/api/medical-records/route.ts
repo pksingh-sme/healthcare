@@ -4,6 +4,9 @@ import { verifyTokenFromRequest } from '@/lib/auth'
 import { logPHIAccess } from '@/lib/audit'
 import { encryptPHI, decryptPHI } from '@/lib/encryption'
 
+// Make this route dynamic to prevent static generation issues
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const user = await verifyTokenFromRequest(request)

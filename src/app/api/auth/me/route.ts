@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma'
 import { extractTokenFromHeaders, verifyToken } from '@/lib/auth'
 import { successResponse, errorResponse, handleApiError } from '@/lib/api'
 
+// Make this route dynamic to prevent static generation issues
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const token = extractTokenFromHeaders(request.headers)

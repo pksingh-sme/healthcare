@@ -4,6 +4,9 @@ import { verifyTokenFromRequest } from '@/lib/auth'
 import { Role, InsuranceType } from '@prisma/client'
 import { z } from 'zod'
 
+// Make this route dynamic to prevent static generation issues
+export const dynamic = 'force-dynamic'
+
 const updatePatientSchema = z.object({
   firstName: z.string().min(1, 'First name is required').optional(),
   lastName: z.string().min(1, 'Last name is required').optional(),
@@ -75,7 +78,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
           ...(validatedData.zipCode !== undefined && { zipCode: validatedData.zipCode }),
           ...(validatedData.emergencyContact !== undefined && { emergencyContact: validatedData.emergencyContact }),
           ...(validatedData.emergencyPhone !== undefined && { emergencyPhone: validatedData.emergencyPhone }),
-          ...(validatedData.insuranceType !== undefined && { insuranceType: validatedData.insuranceType as any }),
+          ...(validatedData.insuranceType !== undefined && { insuranceType: InsuranceType[validatedData.insuranceType as keyof typeof InsuranceType] }),
           ...(validatedData.insuranceProvider !== undefined && { insuranceProvider: validatedData.insuranceProvider }),
         },
       })

@@ -4,6 +4,9 @@ import { verifyTokenFromRequest } from '@/lib/auth'
 import { Role } from '@prisma/client'
 import { headers } from 'next/headers'
 
+// Make this route dynamic to prevent static generation issues
+export const dynamic = 'force-dynamic'
+
 // PUT /api/demo-requests/[id] - Update a demo request status (protected endpoint)
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {

@@ -4,6 +4,9 @@ import { generateToken } from '@/lib/auth'
 import { Role } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
+// Make this route dynamic to prevent static generation issues
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()

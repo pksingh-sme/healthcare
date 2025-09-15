@@ -4,6 +4,9 @@ import { prisma } from '@/lib/prisma'
 import { verifyPassword, generateToken, createSession } from '@/lib/auth'
 import { successResponse, errorResponse, handleApiError } from '@/lib/api'
 
+// Make this route dynamic to prevent static generation issues
+export const dynamic = 'force-dynamic'
+
 const LoginSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(1, 'Password is required'),

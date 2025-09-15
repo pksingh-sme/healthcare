@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma'
 import { verifyTokenFromRequest } from '@/lib/auth'
 import { AppointmentStatus } from '@prisma/client'
 
+// Make this route dynamic to prevent static generation issues
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const user = await verifyTokenFromRequest(request)

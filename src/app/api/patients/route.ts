@@ -5,6 +5,9 @@ import { Role, InsuranceType } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
+// Make this route dynamic to prevent static generation issues
+export const dynamic = 'force-dynamic'
+
 const createPatientSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),

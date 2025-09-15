@@ -4,6 +4,9 @@ import { Server as SocketIOServer } from 'socket.io';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 
+// Make this route dynamic to prevent static generation issues
+export const dynamic = 'force-dynamic';
+
 // Extend the global type definition
 declare global {
   namespace NodeJS {
