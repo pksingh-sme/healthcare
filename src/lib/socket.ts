@@ -287,7 +287,7 @@ export default function SocketHandler(
       })
 
       // Handle disconnection
-      socket.on('disconnect', (reason) => {
+      socket.on('disconnect', (reason: string) => {
         
         const userOfflineData = {
           id: socket.userId,
