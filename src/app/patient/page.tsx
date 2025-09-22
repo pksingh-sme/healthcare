@@ -6,6 +6,8 @@ import { formatSimpleProviderName } from '@/lib/format'
 import { SocketProvider } from '@/contexts/SocketContext'
 import { MessagingCenter } from '@/components/realtime/MessagingCenter'
 import jsPDF from 'jspdf'
+import { SimpleSettingsDropdown } from '@/components/ui/simple-settings-dropdown'
+import { ChangePasswordDialog } from '@/components/ui/change-password-dialog'
 
 // Inline Dialog Components to replace problematic import
 interface DialogProps {
@@ -106,6 +108,7 @@ export default function PatientPortal() {
   const [loading, setLoading] = useState(true)
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   const [selectedBillingRecord, setSelectedBillingRecord] = useState<BillingRecord | null>(null)
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false)
 
   // Persist active tab in localStorage
   useEffect(() => {
@@ -360,15 +363,18 @@ export default function PatientPortal() {
                 Welcome back, <strong>{user.firstName}</strong>! Manage your healthcare information.
               </p>
             </div>
-            <Button
-              onClick={() => {
-                localStorage.removeItem('token')
-                window.location.href = '/login'
-              }}
-              className="logout-button"
-            >
-              Sign Out
-            </Button>
+            <div className="flex items-center space-x-2">
+              <SimpleSettingsDropdown />
+              <Button
+                onClick={() => {
+                  localStorage.removeItem('token')
+                  window.location.href = '/login'
+                }}
+                className="logout-button"
+              >
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -384,128 +390,155 @@ export default function PatientPortal() {
 
           {/* Profile Tab */}
           <TabsContent value="profile">
-            <Card className="card-colorful border-2 border-purple-200 dark:border-purple-700">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-t-lg">
-                <CardTitle className="text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Personal Information</CardTitle>
-                <CardDescription className="text-blue-600 dark:text-blue-300">
-                  Manage your personal details and medical information
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {profile && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input
-                        id="firstName"
-                        value={user.firstName}
-                        disabled
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input
-                        id="lastName"
-                        value={user.lastName}
-                        disabled
-                      />
-                    </div>
+            <div className="space-y-6">
+              <Card className="card-colorful border-2 border-purple-200 dark:border-purple-700">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-t-lg">
+                  <CardTitle className="text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Personal Information</CardTitle>
+                  <CardDescription className="text-blue-600 dark:text-blue-300">
+                    Manage your personal details and medical information
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {profile && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input
+                          id="firstName"
+                          value={user.firstName}
+                          disabled
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input
+                          id="lastName"
+                          value={user.lastName}
+                          disabled
+                        />
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        value={user.email}
-                        disabled
-                      />
-                    </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          value={user.email}
+                          disabled
+                        />
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone</Label>
-                      <Input
-                        id="phone"
-                        value={user.phone || ''}
-                        disabled
-                      />
-                    </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Phone</Label>
+                        <Input
+                          id="phone"
+                          value={user.phone || ''}
+                          disabled
+                        />
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                      <Input
-                        id="dateOfBirth"
-                        type="date"
-                        value={profile.dateOfBirth ? new Date(profile.dateOfBirth).toISOString().split('T')[0] : ''}
-                        onChange={(e) => setProfile({ ...profile, dateOfBirth: e.target.value })}
-                      />
-                    </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                        <Input
+                          id="dateOfBirth"
+                          type="date"
+                          value={profile.dateOfBirth ? new Date(profile.dateOfBirth).toISOString().split('T')[0] : ''}
+                          onChange={(e) => setProfile({ ...profile, dateOfBirth: e.target.value })}
+                        />
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="gender">Gender</Label>
-                      <Select
-                        value={profile.gender || ''}
-                        onValueChange={(value) => setProfile({ ...profile, gender: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select gender" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="male">Male</SelectItem>
-                          <SelectItem value="female">Female</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                          <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="gender">Gender</Label>
+                        <Select
+                          value={profile.gender || ''}
+                          onValueChange={(value) => setProfile({ ...profile, gender: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select gender" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="male">Male</SelectItem>
+                            <SelectItem value="female">Female</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                            <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="emergencyContact">Emergency Contact</Label>
-                      <Input
-                        id="emergencyContact"
-                        value={profile.emergencyContact || ''}
-                        onChange={(e) => setProfile({ ...profile, emergencyContact: e.target.value })}
-                      />
-                    </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="emergencyContact">Emergency Contact</Label>
+                        <Input
+                          id="emergencyContact"
+                          value={profile.emergencyContact || ''}
+                          onChange={(e) => setProfile({ ...profile, emergencyContact: e.target.value })}
+                        />
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="emergencyPhone">Emergency Phone</Label>
-                      <Input
-                        id="emergencyPhone"
-                        value={profile.emergencyPhone || ''}
-                        onChange={(e) => setProfile({ ...profile, emergencyPhone: e.target.value })}
-                      />
-                    </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="emergencyPhone">Emergency Phone</Label>
+                        <Input
+                          id="emergencyPhone"
+                          value={profile.emergencyPhone || ''}
+                          onChange={(e) => setProfile({ ...profile, emergencyPhone: e.target.value })}
+                        />
+                      </div>
 
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="allergies">Allergies</Label>
-                      <Textarea
-                        id="allergies"
-                        placeholder="List any known allergies"
-                        value={profile.allergies || ''}
-                        onChange={(e) => setProfile({ ...profile, allergies: e.target.value })}
-                      />
-                    </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="allergies">Allergies</Label>
+                        <Textarea
+                          id="allergies"
+                          placeholder="List any known allergies"
+                          value={profile.allergies || ''}
+                          onChange={(e) => setProfile({ ...profile, allergies: e.target.value })}
+                        />
+                      </div>
 
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="medications">Current Medications</Label>
-                      <Textarea
-                        id="medications"
-                        placeholder="List current medications"
-                        value={profile.medications || ''}
-                        onChange={(e) => setProfile({ ...profile, medications: e.target.value })}
-                      />
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="medications">Current Medications</Label>
+                        <Textarea
+                          id="medications"
+                          placeholder="List current medications"
+                          value={profile.medications || ''}
+                          onChange={(e) => setProfile({ ...profile, medications: e.target.value })}
+                        />
+                      </div>
                     </div>
+                  )}
+
+                  <Button
+                    onClick={() => profile && updateProfile(profile)}
+                    className="clinic-gradient text-white"
+                  >
+                    Update Profile
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Security Section */}
+              <Card className="card-colorful border-2 border-green-200 dark:border-green-700">
+                <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-t-lg">
+                  <CardTitle className="text-xl bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">Account Security</CardTitle>
+                  <CardDescription className="text-green-600 dark:text-green-300">
+                    Manage your account security settings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-700/50 rounded-lg border border-green-200 dark:border-green-700">
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-white">Password</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Last changed: Today</p>
+                    </div>
+                    <Button 
+                      onClick={() => setChangePasswordOpen(true)}
+                      variant="outline"
+                      className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-600 dark:text-green-400 dark:hover:bg-green-900/30"
+                    >
+                      Change Password
+                    </Button>
                   </div>
-                )}
-
-                <Button
-                  onClick={() => profile && updateProfile(profile)}
-                  className="clinic-gradient text-white"
-                >
-                  Update Profile
-                </Button>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Appointments Tab */}
@@ -700,6 +733,18 @@ export default function PatientPortal() {
                 </div>
               </div>
               
+              {/* Notes Section */}
+              {selectedAppointment.notes && (
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Appointment Notes</h4>
+                  <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-md">
+                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                      {selectedAppointment.notes}
+                    </p>
+                  </div>
+                </div>
+              )}
+              
               {selectedAppointment.status === 'SCHEDULED' && (
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                   <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Preparation Instructions</h4>
@@ -803,6 +848,9 @@ export default function PatientPortal() {
           )}
         </DialogContent>
       </Dialog>
+      
+      {/* Change Password Dialog */}
+      <ChangePasswordDialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
     </div>
   )
 }
