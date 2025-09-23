@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       // In production, implement proper 2FA verification
       // For demo, accept any 6-digit token
       if (!/^\d{6}$/.test(twoFAToken)) {
-        return errorResponse('Invalid 2FA token', 401)
+        return errorResponse('Invalid 2FA token format. Please enter a 6-digit code.', 401)
       }
     }
 

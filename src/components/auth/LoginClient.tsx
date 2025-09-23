@@ -17,6 +17,7 @@ export default function LoginClient() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [infoMessage, setInfoMessage] = useState('')
   const [twoFASent, setTwoFASent] = useState(false)
   const { login, user, error: authError, twoFARequired } = useAuth()
   const router = useRouter()
@@ -42,6 +43,14 @@ export default function LoginClient() {
     }
   }, [user, router])
 
+  useEffect(() => {
+    // When 2FA is required, clear any previous errors and show info message
+    if (twoFARequired) {
+      setError('')
+      setInfoMessage('Please enter the 2FA code sent to your email.')
+    }
+  }, [twoFARequired])
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({
@@ -54,6 +63,7 @@ export default function LoginClient() {
     e.preventDefault()
     setIsSubmitting(true)
     setError('')
+    setInfoMessage('')
 
     try {
       const success = await login(
@@ -63,9 +73,11 @@ export default function LoginClient() {
       )
 
       if (!success) {
-        // Error is already set in the AuthContext, but we can add a fallback
-        if (!authError && !twoFARequired) {
-          setError('Login failed. Please check your credentials.')
+        // Only show error if it's not the 2FA flow
+        if (!twoFARequired) {
+          setError(authError || 'Login failed. Please check your credentials.')
+        } else {
+          setInfoMessage('Please enter the 2FA code sent to your email.')
         }
       }
     } catch (err) {
@@ -78,6 +90,7 @@ export default function LoginClient() {
   const handleSend2FA = async () => {
     setIsSubmitting(true)
     setError('')
+    setInfoMessage('')
     
     try {
       const response = await fetch('/api/auth/send-2fa', {
@@ -95,6 +108,7 @@ export default function LoginClient() {
       }
       
       setTwoFASent(true)
+      setInfoMessage('2FA code sent to your email. Please check your inbox.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send 2FA code')
     } finally {
@@ -219,9 +233,17 @@ export default function LoginClient() {
                 )}
               </div>
 
-              {(error || authError) && (
+              {/* Error messages */}
+              {(error || authError) && !twoFARequired && (
                 <div className="text-red-600 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
                   {error || authError}
+                </div>
+              )}
+
+              {/* Info messages */}
+              {infoMessage && (
+                <div className="text-blue-600 text-sm text-center bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                  {infoMessage}
                 </div>
               )}
 
