@@ -23,7 +23,8 @@ const createPatientSchema = z.object({
   emergencyPhone: z.string().optional(),
   insuranceType: z.enum(['PRIVATE', 'MEDICARE', 'MEDICAID', 'SELF_PAY', 'OTHER']).optional(),
   insuranceProvider: z.string().optional(),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  // Remove password requirement for patient creation
+  // password: z.string().min(6, 'Password must be at least 6 characters'),
 })
 
 const updatePatientSchema = z.object({
@@ -66,12 +67,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User with this email already exists' }, { status: 400 })
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(validatedData.password, 12)
+    // Generate a temporary password
+    const temporaryPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8)
 
-    // Create user and patient in a transaction
+    // Hash the temporary password
+    const hashedPassword = await bcrypt.hash(temporaryPassword, 12)
+
+    // Create user and patient in a transaction (with temporary password)
     const result = await prisma.$transaction(async (prisma) => {
-      // Create user
+      // Create user with temporary password
       const newUser = await prisma.user.create({
         data: {
           email: validatedData.email,
@@ -106,6 +110,24 @@ export async function POST(request: NextRequest) {
       return { user: newUser, patient: newPatient }
     })
 
+    // Send password setup email
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/send-password-setup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: validatedData.email,
+          firstName: validatedData.firstName,
+          userId: result.user.id,
+        }),
+      })
+    } catch (emailError) {
+      console.error('Failed to send password setup email:', emailError)
+      // Don't fail the whole operation if email sending fails
+    }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -129,7 +151,7 @@ export async function POST(request: NextRequest) {
         insuranceType: result.patient.insuranceType,
         insuranceProvider: result.patient.insuranceProvider,
       },
-      message: 'Patient created successfully',
+      message: 'Patient created successfully. A password setup email has been sent to the patient.',
     }, { status: 201 })
   } catch (error) {
     console.error('Error creating patient:', error)

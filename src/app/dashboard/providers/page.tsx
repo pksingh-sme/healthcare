@@ -58,7 +58,6 @@ interface ProviderFormData {
   lastName: string
   email: string
   phone: string
-  password: string
   title: string
   specialty: string
   licenseNumber: string
@@ -85,7 +84,6 @@ export default function ProvidersPage() {
     lastName: '',
     email: '',
     phone: '',
-    password: '',
     title: '',
     specialty: '',
     licenseNumber: '',
@@ -97,7 +95,6 @@ export default function ProvidersPage() {
     lastName: '',
     email: '',
     phone: '',
-    password: '',
     title: '',
     specialty: '',
     licenseNumber: '',
@@ -161,7 +158,6 @@ export default function ProvidersPage() {
       lastName: provider.user.lastName,
       email: provider.user.email,
       phone: provider.user.phone || '',
-      password: '',
       title: provider.title || '',
       specialty: provider.specialty || '',
       licenseNumber: provider.licenseNumber || '',
@@ -204,7 +200,6 @@ export default function ProvidersPage() {
           lastName: '',
           email: '',
           phone: '',
-          password: '',
           title: '',
           specialty: '',
           licenseNumber: '',
@@ -501,7 +496,7 @@ export default function ProvidersPage() {
               <DialogHeader>
                 <DialogTitle>Add New Provider</DialogTitle>
                 <DialogDescription>
-                  Enter the provider's information to create a new account.
+                  Enter the provider's information to create a new account. A password setup email will be sent to the provider.
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAddProvider} className="space-y-4">
@@ -554,20 +549,6 @@ export default function ProvidersPage() {
                       value={providerFormData.phone}
                       onChange={handleInputChange}
                     />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="password">Password *</Label>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      value={providerFormData.password}
-                      onChange={handleInputChange}
-                      required
-                      minLength={8}
-                    />
-                    <PasswordStrengthMeter password={providerFormData.password} />
                   </div>
                   
                   <div>

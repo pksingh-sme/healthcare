@@ -69,7 +69,6 @@ interface PatientFormData {
   emergencyPhone: string
   insuranceType: string
   insuranceProvider: string
-  password: string
 }
 
 export default function PatientsPage() {
@@ -102,7 +101,6 @@ export default function PatientsPage() {
     emergencyPhone: '',
     insuranceType: 'SELF_PAY',
     insuranceProvider: '',
-    password: '',
   })
 
   const [editPatientFormData, setEditPatientFormData] = useState<PatientFormData>({
@@ -120,7 +118,6 @@ export default function PatientsPage() {
     emergencyPhone: '',
     insuranceType: 'SELF_PAY',
     insuranceProvider: '',
-    password: '',
   })
 
   useEffect(() => {
@@ -190,7 +187,6 @@ export default function PatientsPage() {
       emergencyPhone: '',
       insuranceType: patient.insuranceType || 'SELF_PAY',
       insuranceProvider: patient.insuranceProvider || '',
-      password: '',
     })
     setIsEditModalOpen(true)
   }
@@ -239,7 +235,6 @@ export default function PatientsPage() {
           emergencyPhone: '',
           insuranceType: 'SELF_PAY',
           insuranceProvider: '',
-          password: '',
         })
       } else {
         const result = await response.json()
@@ -626,7 +621,7 @@ export default function PatientsPage() {
               <DialogHeader>
                 <DialogTitle>Add New Patient</DialogTitle>
                 <DialogDescription>
-                  Enter the patient's information to create a new account.
+                  Enter the patient's information to create a new account. A password setup email will be sent to the patient.
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAddPatient} className="space-y-4">
@@ -705,19 +700,6 @@ export default function PatientsPage() {
                         <SelectItem value="Other">Other</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="password">Password *</Label>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      value={patientFormData.password}
-                      onChange={handleInputChange}
-                      required
-                      minLength={6}
-                    />
                   </div>
                   
                   <div>

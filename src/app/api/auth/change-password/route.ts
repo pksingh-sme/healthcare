@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyTokenFromRequest } from '@/lib/auth'
-import { comparePassword, hashPassword } from '@/lib/auth'
+import { verifyPassword, hashPassword } from '@/lib/auth'
 import { successResponse, errorResponse, handleApiError } from '@/lib/api'
 
 // Make this route dynamic to prevent static generation issues
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify current password
-    const isCurrentPasswordValid = await comparePassword(currentPassword, dbUser.password)
+    const isCurrentPasswordValid = await verifyPassword(currentPassword, dbUser.password)
     if (!isCurrentPasswordValid) {
       return errorResponse('Current password is incorrect', 400)
     }

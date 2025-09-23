@@ -86,6 +86,7 @@ interface Appointment {
       lastName: string
     }
   }
+  notes?: string
 }
 
 interface BillingRecord {
@@ -289,7 +290,6 @@ export default function PatientPortal() {
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
     
-    // Add invoice details
     doc.text(`Invoice Number: ${record.invoiceNumber}`, 20, 60);
     doc.text(`Service Date: ${new Date(record.serviceDate).toLocaleDateString()}`, 20, 70);
     doc.text(`Service Description: ${record.serviceDescription}`, 20, 80);
@@ -359,21 +359,12 @@ export default function PatientPortal() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Patient Portal</h1>
-              <p className="text-blue-600 dark:text-blue-300 mt-1 font-medium">
-                Welcome back, <strong>{user.firstName}</strong>! Manage your healthcare information.
-              </p>
             </div>
-            <div className="flex items-center space-x-2">
-              <SimpleSettingsDropdown />
-              <Button
-                onClick={() => {
-                  localStorage.removeItem('token')
-                  window.location.href = '/login'
-                }}
-                className="logout-button"
-              >
-                Sign Out
-              </Button>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <span className="font-medium text-gray-700 dark:text-gray-300">{user.firstName} {user.lastName}</span>
+                <SimpleSettingsDropdown />
+              </div>
             </div>
           </div>
         </div>
@@ -511,31 +502,6 @@ export default function PatientPortal() {
                   >
                     Update Profile
                   </Button>
-                </CardContent>
-              </Card>
-
-              {/* Security Section */}
-              <Card className="card-colorful border-2 border-green-200 dark:border-green-700">
-                <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-t-lg">
-                  <CardTitle className="text-xl bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">Account Security</CardTitle>
-                  <CardDescription className="text-green-600 dark:text-green-300">
-                    Manage your account security settings
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-700/50 rounded-lg border border-green-200 dark:border-green-700">
-                    <div>
-                      <h3 className="font-medium text-gray-900 dark:text-white">Password</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">Last changed: Today</p>
-                    </div>
-                    <Button 
-                      onClick={() => setChangePasswordOpen(true)}
-                      variant="outline"
-                      className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-600 dark:text-green-400 dark:hover:bg-green-900/30"
-                    >
-                      Change Password
-                    </Button>
-                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -734,7 +700,7 @@ export default function PatientPortal() {
               </div>
               
               {/* Notes Section */}
-              {selectedAppointment.notes && (
+              {selectedAppointment.notes && selectedAppointment.notes.length > 0 && (
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                   <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Appointment Notes</h4>
                   <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-md">

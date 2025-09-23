@@ -21,6 +21,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ChangePasswordDialog } from '@/components/ui/change-password-dialog'
 
 interface SimpleSettingsDropdownProps {
@@ -84,6 +85,13 @@ export function SimpleSettingsDropdown({ className }: SimpleSettingsDropdownProp
     return null
   }
 
+  // Get initials for avatar fallback
+  const getUserInitials = () => {
+    const firstInitial = user.firstName?.charAt(0) || '';
+    const lastInitial = user.lastName?.charAt(0) || '';
+    return `${firstInitial}${lastInitial}`.toUpperCase();
+  };
+
   return (
     <>
       <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
@@ -92,17 +100,19 @@ export function SimpleSettingsDropdown({ className }: SimpleSettingsDropdownProp
             <Button
               variant="ghost"
               size="sm"
-              className={`h-6 w-6 p-0 hover:bg-gradient-to-r hover:from-purple-200 hover:to-pink-200 dark:hover:from-purple-800 dark:hover:to-pink-800 transition-all duration-300 rounded-md ${className}`}
+              className={`h-8 w-8 p-0 hover:bg-gradient-to-r hover:from-purple-200 hover:to-pink-200 dark:hover:from-purple-800 dark:hover:to-pink-800 transition-all duration-300 rounded-full ${className}`}
             >
-              <svg className="w-3 h-3 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={user.profileImage || ''} alt={`${user.firstName} ${user.lastName}`} />
+                <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium">
+                  {getUserInitials()}
+                </AvatarFallback>
+              </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-700 shadow-xl">
             <DropdownMenuLabel className="text-purple-700 dark:text-purple-300 font-semibold text-xs">
-              ⚙️ Settings
+              👤 {user.firstName} {user.lastName}
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-purple-200 dark:bg-purple-700" />
             
