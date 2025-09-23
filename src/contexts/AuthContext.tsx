@@ -3,12 +3,23 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { Role } from '@prisma/client'
 
+interface InsuranceDocument {
+  id: string
+  name: string
+  fileName: string
+  fileSize: number
+  fileType: string
+  url: string
+  uploadedAt: Date
+}
+
 interface Patient {
   id: string
   userId: string
   dateOfBirth?: Date
   emergencyContact?: string
   insurance?: string
+  insuranceDocuments?: InsuranceDocument[]
 }
 
 interface Provider {

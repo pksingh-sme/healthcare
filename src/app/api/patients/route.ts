@@ -102,8 +102,7 @@ export async function POST(request: NextRequest) {
           emergencyContact: validatedData.emergencyContact,
           emergencyPhone: validatedData.emergencyPhone,
           insuranceType: validatedData.insuranceType ? InsuranceType[validatedData.insuranceType as keyof typeof InsuranceType] : InsuranceType.SELF_PAY,
-          insuranceProvider: validatedData.insuranceProvider,
-
+          insuranceProvider: validatedData.insuranceType === 'SELF_PAY' ? null : validatedData.insuranceProvider,
         },
       })
 
@@ -222,8 +221,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
           ...(validatedData.emergencyContact !== undefined && { emergencyContact: validatedData.emergencyContact }),
           ...(validatedData.emergencyPhone !== undefined && { emergencyPhone: validatedData.emergencyPhone }),
           ...(validatedData.insuranceType !== undefined && { insuranceType: InsuranceType[validatedData.insuranceType as keyof typeof InsuranceType] }),
-          ...(validatedData.insuranceProvider !== undefined && { insuranceProvider: validatedData.insuranceProvider }),
-
+          ...(validatedData.insuranceProvider !== undefined && { 
+            insuranceProvider: validatedData.insuranceType === 'SELF_PAY' ? null : validatedData.insuranceProvider 
+          }),
         },
       })
 

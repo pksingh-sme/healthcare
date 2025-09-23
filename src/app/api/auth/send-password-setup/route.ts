@@ -103,12 +103,27 @@ export async function POST(request: Request) {
       )
     }
 
+    // Fetch user's last name and role from database
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { lastName: true, role: true }
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
+    }
+
     // Generate a setup token
     const setupToken = generateToken({
       userId,
       email,
       firstName,
-    }, '24h') // Token expires in 24 hours
+      lastName: user.lastName,
+      role: user.role,
+    })
 
     // Send the password setup email
     await sendPasswordSetupEmail(email, firstName, setupToken)

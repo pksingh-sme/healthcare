@@ -35,8 +35,8 @@ model User {
 }
 
 model Patient {
-  id                    String          @id @default(cuid())
-  userId                String          @unique
+  id                    String            @id @default(cuid())
+  userId                String            @unique
   dateOfBirth           DateTime
   gender                String?
   address               String?
@@ -45,20 +45,21 @@ model Patient {
   zipCode               String?
   emergencyContact      String?
   emergencyPhone        String?
-  insuranceType         InsuranceType   @default(SELF_PAY)
+  insuranceType         InsuranceType     @default(SELF_PAY)
   insuranceProvider     String?
   insurancePolicyNumber String?
   insuranceGroupNumber  String?
+  insuranceDocuments    InsuranceDocument[]
   allergies             String?
   medications           String?
   medicalHistory        String?
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
   appointments          Appointment[]
   billings              Billing[]
   records               MedicalRecord[]
   messages              Message[]
-  user                  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("patients")
 }
@@ -325,3 +326,17 @@ model BusinessAssociate {
 }
 
 // Update the Session model for enhanced security
+
+model InsuranceDocument {
+  id          String   @id @default(cuid())
+  patientId   String
+  name        String
+  fileName    String
+  fileSize    Int
+  fileType    String
+  url         String
+  uploadedAt  DateTime @default(now())
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("insurance_documents")
+}

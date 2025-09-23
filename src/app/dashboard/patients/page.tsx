@@ -37,6 +37,23 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { ProtectedRoute } from '@/components/protected-route'
+import { InsuranceDocumentUpload } from '@/components/insurance/insurance-document-upload'
+import { InsuranceDocumentList } from '@/components/insurance/insurance-document-list'
+
+const COMMON_INSURANCE_PROVIDERS = [
+  'Blue Cross Blue Shield',
+  'UnitedHealthcare',
+  'Aetna',
+  'Cigna',
+  'Humana',
+  'Kaiser Permanente',
+  'Anthem',
+  'Centene',
+  'HCSC',
+  'Molina Healthcare',
+  'CVS Health',
+  'Other'
+]
 
 interface Patient {
   id: string
@@ -69,6 +86,7 @@ interface PatientFormData {
   emergencyPhone: string
   insuranceType: string
   insuranceProvider: string
+  insuranceProviderOther?: string
 }
 
 export default function PatientsPage() {
@@ -101,6 +119,7 @@ export default function PatientsPage() {
     emergencyPhone: '',
     insuranceType: 'SELF_PAY',
     insuranceProvider: '',
+    insuranceProviderOther: '',
   })
 
   const [editPatientFormData, setEditPatientFormData] = useState<PatientFormData>({
@@ -118,6 +137,7 @@ export default function PatientsPage() {
     emergencyPhone: '',
     insuranceType: 'SELF_PAY',
     insuranceProvider: '',
+    insuranceProviderOther: '',
   })
 
   useEffect(() => {
@@ -172,6 +192,9 @@ export default function PatientsPage() {
   const handleEditPatient = (patient: Patient) => {
     setSelectedPatient(patient)
     // Populate the edit form with patient data
+    const isCommonProvider = patient.insuranceProvider && COMMON_INSURANCE_PROVIDERS.includes(patient.insuranceProvider)
+    const isOtherProvider = patient.insuranceProvider && !isCommonProvider && patient.insuranceType !== 'SELF_PAY'
+    
     setEditPatientFormData({
       firstName: patient.user.firstName,
       lastName: patient.user.lastName,
@@ -186,7 +209,8 @@ export default function PatientsPage() {
       emergencyContact: patient.emergencyContact || '',
       emergencyPhone: '',
       insuranceType: patient.insuranceType || 'SELF_PAY',
-      insuranceProvider: patient.insuranceProvider || '',
+      insuranceProvider: isCommonProvider ? (patient.insuranceProvider || '') : isOtherProvider ? 'Other' : '',
+      insuranceProviderOther: isOtherProvider ? (patient.insuranceProvider || '') : '',
     })
     setIsEditModalOpen(true)
   }
@@ -197,13 +221,29 @@ export default function PatientsPage() {
       setAddPatientLoading(true)
       setAddPatientError('')
       
+      // Use the "other" provider name if "Other" is selected
+      let insuranceProvider = patientFormData.insuranceProvider || ''
+      if (patientFormData.insuranceProvider === 'Other') {
+        insuranceProvider = patientFormData.insuranceProviderOther || ''
+      }
+      
+      // If SELF_PAY is selected, clear the insurance provider
+      if (patientFormData.insuranceType === 'SELF_PAY') {
+        insuranceProvider = ''
+      }
+      
+      const patientData = {
+        ...patientFormData,
+        insuranceProvider
+      }
+      
       const response = await fetch('/api/patients', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(patientFormData),
+        body: JSON.stringify(patientData),
       })
 
       if (response.ok) {
@@ -253,13 +293,29 @@ export default function PatientsPage() {
       setEditPatientLoading(true)
       setEditPatientError('')
       
+      // Use the "other" provider name if "Other" is selected
+      let insuranceProvider = editPatientFormData.insuranceProvider || ''
+      if (editPatientFormData.insuranceProvider === 'Other') {
+        insuranceProvider = editPatientFormData.insuranceProviderOther || ''
+      }
+      
+      // If SELF_PAY is selected, clear the insurance provider
+      if (editPatientFormData.insuranceType === 'SELF_PAY') {
+        insuranceProvider = ''
+      }
+      
+      const patientData = {
+        ...editPatientFormData,
+        insuranceProvider
+      }
+      
       const response = await fetch(`/api/patients/${selectedPatient?.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(editPatientFormData),
+        body: JSON.stringify(patientData),
       })
 
       if (response.ok) {
@@ -310,17 +366,47 @@ export default function PatientsPage() {
   }
 
   const handleSelectChange = (name: string, value: string) => {
-    setPatientFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    setPatientFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: value
+      }
+      
+      // Clear insurance provider when switching to SELF_PAY
+      if (name === 'insuranceType' && value === 'SELF_PAY') {
+        newData.insuranceProvider = ''
+        newData.insuranceProviderOther = ''
+      }
+      
+      // Reset the "other" field when changing provider
+      if (name === 'insuranceProvider') {
+        newData.insuranceProviderOther = ''
+      }
+      
+      return newData
+    })
   }
 
   const handleEditSelectChange = (name: string, value: string) => {
-    setEditPatientFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    setEditPatientFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: value
+      }
+      
+      // Clear insurance provider when switching to SELF_PAY
+      if (name === 'insuranceType' && value === 'SELF_PAY') {
+        newData.insuranceProvider = ''
+        newData.insuranceProviderOther = ''
+      }
+      
+      // Reset the "other" field when changing provider
+      if (name === 'insuranceProvider') {
+        newData.insuranceProviderOther = ''
+      }
+      
+      return newData
+    })
   }
 
   const filteredPatients = patients.filter(patient =>
@@ -412,16 +498,30 @@ export default function PatientsPage() {
                       <div className="p-2 border rounded bg-gray-100 dark:bg-gray-700">{selectedPatient.insuranceType || 'Not provided'}</div>
                     </div>
                     
-                    <div>
-                      <Label>Insurance Provider</Label>
-                      <div className="p-2 border rounded bg-gray-100 dark:bg-gray-700">{selectedPatient.insuranceProvider || 'Not provided'}</div>
-                    </div>
+                    {selectedPatient.insuranceType !== 'SELF_PAY' && (
+                      <div>
+                        <Label>Insurance Provider</Label>
+                        <div className="p-2 border rounded bg-gray-100 dark:bg-gray-700">
+                          {selectedPatient.insuranceProvider && !COMMON_INSURANCE_PROVIDERS.includes(selectedPatient.insuranceProvider)
+                            ? selectedPatient.insuranceProvider
+                            : selectedPatient.insuranceProvider || 'Not provided'}
+                        </div>
+                      </div>
+                    )}
                     
                     <div>
                       <Label>Emergency Contact</Label>
                       <div className="p-2 border rounded bg-gray-100 dark:bg-gray-700">{selectedPatient.emergencyContact || 'Not provided'}</div>
                     </div>
                   </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <InsuranceDocumentUpload 
+                      patientId={selectedPatient.id}
+                      onUploadSuccess={fetchPatients}
+                    />
+                    <InsuranceDocumentList patientId={selectedPatient.id} />
+                  </div>
+
                 </div>
               )}
             </DialogContent>
@@ -530,16 +630,34 @@ export default function PatientsPage() {
                     </Select>
                   </div>
                   
-                  <div>
-                    <Label htmlFor="editInsuranceProvider">Insurance Provider</Label>
-                    <Input
-                      id="editInsuranceProvider"
-                      name="insuranceProvider"
-                      value={editPatientFormData.insuranceProvider}
-                      onChange={handleEditInputChange}
-                    />
-                  </div>
-                  
+                  {editPatientFormData.insuranceType !== 'SELF_PAY' && (
+                    <div>
+                      <Label htmlFor="editInsuranceProvider">Insurance Provider</Label>
+                      <Select name="insuranceProvider" value={editPatientFormData.insuranceProvider} onValueChange={(value) => handleEditSelectChange('insuranceProvider', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select provider" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {COMMON_INSURANCE_PROVIDERS.map((provider) => (
+                            <SelectItem key={provider} value={provider}>
+                              {provider}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {editPatientFormData.insuranceProvider === 'Other' && (
+                        <Input
+                          id="insuranceProviderOther"
+                          name="insuranceProviderOther"
+                          placeholder="Enter insurance provider"
+                          value={editPatientFormData.insuranceProviderOther || ''}
+                          onChange={handleEditInputChange}
+                          className="mt-2"
+                        />
+                      )}
+                    </div>
+                  )}
+
                   <div>
                     <Label htmlFor="editEmergencyContact">Emergency Contact</Label>
                     <Input
@@ -718,16 +836,34 @@ export default function PatientsPage() {
                     </Select>
                   </div>
                   
-                  <div>
-                    <Label htmlFor="insuranceProvider">Insurance Provider</Label>
-                    <Input
-                      id="insuranceProvider"
-                      name="insuranceProvider"
-                      value={patientFormData.insuranceProvider}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
+                  {patientFormData.insuranceType !== 'SELF_PAY' && (
+                    <div>
+                      <Label htmlFor="insuranceProvider">Insurance Provider</Label>
+                      <Select name="insuranceProvider" value={patientFormData.insuranceProvider} onValueChange={(value) => handleSelectChange('insuranceProvider', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select provider" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {COMMON_INSURANCE_PROVIDERS.map((provider) => (
+                            <SelectItem key={provider} value={provider}>
+                              {provider}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {patientFormData.insuranceProvider === 'Other' && (
+                        <Input
+                          id="insuranceProviderOther"
+                          name="insuranceProviderOther"
+                          placeholder="Enter insurance provider"
+                          value={patientFormData.insuranceProviderOther || ''}
+                          onChange={handleInputChange}
+                          className="mt-2"
+                        />
+                      )}
+                    </div>
+                  )}
+
                   <div>
                     <Label htmlFor="emergencyContact">Emergency Contact</Label>
                     <Input
@@ -921,16 +1057,16 @@ export default function PatientsPage() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="flex flex-col">
-                              <Badge variant="outline" className="w-fit">
-                                {patient.insuranceType || 'SELF_PAY'}
-                              </Badge>
-                              {patient.insuranceProvider && (
-                                <div className="text-sm text-gray-500 mt-1">
-                                  {patient.insuranceProvider}
-                                </div>
-                              )}
+                            <div className="text-sm">
+                              {patient.insuranceType || 'N/A'}
                             </div>
+                            {patient.insuranceType !== 'SELF_PAY' && (
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                {patient.insuranceProvider && !COMMON_INSURANCE_PROVIDERS.includes(patient.insuranceProvider)
+                                  ? patient.insuranceProvider
+                                  : patient.insuranceProvider || 'N/A'}
+                              </div>
+                            )}
                           </TableCell>
                           <TableCell>
                             <div className="text-sm">
