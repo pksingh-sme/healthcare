@@ -3,6 +3,7 @@
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { SocketProvider } from '@/contexts/SocketContext'
+import { CookiePolicyBanner } from '@/components/CookiePolicyBanner'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -14,6 +15,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <AuthProvider>
         <SocketProvider>
           {children}
+          <CookiePolicyBanner />
         </SocketProvider>
       </AuthProvider>
     </ThemeProvider>

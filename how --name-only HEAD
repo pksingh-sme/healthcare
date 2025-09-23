@@ -1,0 +1,16 @@
+[33mcommit 600fd7c1b924d8de62f19b46cd1623e18f0ee0b6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Pramod Singh <pksingh.sme@gmail.com>
+Date:   Tue Sep 23 11:05:26 2025 -0700
+
+    Fix change-password API route and implement password setup functionality
+
+src/app/api/auth/change-password/route.ts
+src/app/api/auth/send-password-setup/route.ts
+src/app/api/auth/setup-password/route.ts
+src/app/api/patients/route.ts
+src/app/api/providers/route.ts
+src/app/dashboard/patients/page.tsx
+src/app/dashboard/providers/page.tsx
+src/app/patient/page.tsx
+src/app/setup-password/page.tsx
+src/components/ui/simple-settings-dropdown.tsx

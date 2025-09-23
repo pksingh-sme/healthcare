@@ -321,6 +321,7 @@ export default function Home() {
                 <li><Link href="/contact" className="text-gray-400 hover:text-white transition-colors hover:underline">Contact</Link></li>
                 <li><Link href="/privacy" className="text-gray-400 hover:text-white transition-colors hover:underline">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="text-gray-400 hover:text-white transition-colors hover:underline">Terms of Service</Link></li>
+                <li><Link href="/cookie-policy" className="text-gray-400 hover:text-white transition-colors hover:underline">Cookie Policy</Link></li>
               </ul>
             </div>
             

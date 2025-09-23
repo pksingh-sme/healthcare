@@ -6,6 +6,7 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { NotificationCenter } from '@/components/realtime/NotificationCenter'
 import { SimpleSettingsDropdown } from '@/components/ui/simple-settings-dropdown'
 import { useAuth } from '@/contexts/AuthContext'
+import Link from 'next/link'
 
 // Lazy load the sidebar for better performance
 const Sidebar = lazy(() => import('./Sidebar').then(mod => ({ default: mod.Sidebar })))
@@ -77,6 +78,28 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
           </Suspense>
         </main>
+        
+        {/* Footer */}
+        <footer className="bg-gray-900 text-white py-8 mt-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <div className="mb-4 md:mb-0">
+                <p className="text-gray-400">&copy; {new Date().getFullYear()} Clinch Infosystems. All rights reserved.</p>
+              </div>
+              <div className="flex space-x-6">
+                <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
+                  Privacy Policy
+                </Link>
+                <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
+                  Terms of Service
+                </Link>
+                <Link href="/cookie-policy" className="text-gray-400 hover:text-white transition-colors">
+                  Cookie Policy
+                </Link>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   )
