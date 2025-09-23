@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'a1b2c3d4e5f67890123456789012345678901234567890123456789012345678';
 const IV_LENGTH = 16;
 
 export function encrypt(text: string): string {
@@ -37,6 +37,12 @@ export function decrypt(text: string): string {
     
     const iv = Buffer.from(textParts[0], 'hex');
     const encryptedText = textParts[1];
+    
+    // Validate that the IV is the correct length
+    if (iv.length !== IV_LENGTH) {
+      throw new Error('Invalid IV length');
+    }
+    
     const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY, 'hex').slice(0, 32), iv);
     let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
     decrypted += decipher.final('utf8');

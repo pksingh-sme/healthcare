@@ -14,7 +14,15 @@
     "db:seed": "tsx prisma/seed.ts",
     "postinstall": "prisma generate",
     "vercel-build": "NEXT_PUBLIC_VERCEL_ENV=production prisma generate && next build",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test-email-2fa": "tsx scripts/test-email-2fa.ts",
+    "test-email-config": "tsx scripts/test-email-config.ts",
+    "test-email-detailed": "tsx scripts/test-email-detailed.ts",
+    "test-login-2fa": "tsx scripts/test-login-2fa.ts",
+    "test-login-flow": "tsx scripts/test-login-flow.ts",
+    "test-encryption": "tsx scripts/test-encryption.ts",
+    "check-user-2fa": "tsx scripts/check-user-2fa.ts",
+    "enable-2fa": "tsx scripts/enable-2fa.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -51,6 +59,7 @@
     "lucide-react": "^0.294.0",
     "next": "14.2.5",
     "next-auth": "^4.24.5",
+    "nodemailer": "^6.6.5",
     "react": "^18",
     "react-calendar": "^4.8.0",
     "react-dom": "^18",
@@ -67,6 +76,7 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.5",
+    "@types/nodemailer": "^7.0.1",
     "autoprefixer": "^10.0.1",
     "cross-env": "^10.0.0",
     "eslint": "^8",

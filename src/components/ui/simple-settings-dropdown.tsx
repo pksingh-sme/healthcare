@@ -21,6 +21,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { ChangePasswordDialog } from '@/components/ui/change-password-dialog'
 
 interface SimpleSettingsDropdownProps {
   className?: string
@@ -30,6 +31,7 @@ export function SimpleSettingsDropdown({ className }: SimpleSettingsDropdownProp
   const { user, logout, token, refreshUser } = useAuth()
   const [open, setOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [profileData, setProfileData] = useState({
@@ -112,6 +114,16 @@ export function SimpleSettingsDropdown({ className }: SimpleSettingsDropdownProp
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               Edit Profile
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem 
+              onSelect={() => setChangePasswordOpen(true)}
+              className="hover:bg-purple-50 dark:hover:bg-purple-900/50 cursor-pointer"
+            >
+              <svg className="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+              </svg>
+              Change Password
             </DropdownMenuItem>
             
             <DropdownMenuItem className="hover:bg-purple-50 dark:hover:bg-purple-900/50 p-0">
@@ -236,6 +248,9 @@ export function SimpleSettingsDropdown({ className }: SimpleSettingsDropdownProp
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Change Password Dialog */}
+      <ChangePasswordDialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
     </>
   )
 }

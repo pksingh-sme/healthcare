@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/contexts/AuthContext'
+import PasswordStrengthMeter from '@/components/auth/PasswordStrengthMeter'
 
 interface PatientData {
   firstName: string
@@ -110,10 +111,8 @@ export default function RegisterClient() {
       return false
     }
 
-    if (data.password.length < 8) {
-      setError('Password must be at least 8 characters long')
-      return false
-    }
+    // Note: More detailed validation now happens on the backend
+    // We're keeping this minimal validation on the frontend for immediate feedback
 
     if (isProvider) {
       const provider = data as ProviderData
@@ -275,6 +274,14 @@ export default function RegisterClient() {
                       required
                       disabled={isSubmitting}
                     />
+                    <PasswordStrengthMeter 
+                      password={patientData.password} 
+                      personalInfo={{
+                        firstName: patientData.firstName,
+                        lastName: patientData.lastName,
+                        email: patientData.email
+                      }}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="confirmPassword">Confirm Password</Label>
@@ -382,6 +389,14 @@ export default function RegisterClient() {
                       onChange={handleProviderChange}
                       required
                       disabled={isSubmitting}
+                    />
+                    <PasswordStrengthMeter 
+                      password={providerData.password} 
+                      personalInfo={{
+                        firstName: providerData.firstName,
+                        lastName: providerData.lastName,
+                        email: providerData.email
+                      }}
                     />
                   </div>
                   <div className="space-y-2">

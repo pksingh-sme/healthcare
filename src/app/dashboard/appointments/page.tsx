@@ -17,13 +17,6 @@ import {
   TableRow 
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css'
 import { useAuth } from '@/contexts/AuthContext'
@@ -411,78 +404,80 @@ export default function AppointmentsPage() {
         </div>
 
         {/* Appointment Details Modal */}
-        <Dialog open={!!selectedAppointment} onOpenChange={() => setSelectedAppointment(null)}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Appointment Details</DialogTitle>
-              <DialogDescription>
-                Complete information about the appointment
-              </DialogDescription>
-            </DialogHeader>
-            {selectedAppointment && (
-              <div className="space-y-6 p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Appointment Title</Label>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedAppointment.title}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Type</Label>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedAppointment.type || 'General Consultation'}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Date & Start Time</Label>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{new Date(selectedAppointment.startTime).toLocaleString()}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">End Time</Label>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{new Date(selectedAppointment.endTime).toLocaleString()}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Duration</Label>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {Math.round((new Date(selectedAppointment.endTime).getTime() - new Date(selectedAppointment.startTime).getTime()) / (1000 * 60))} minutes
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Status</Label>
-                    <div>{getStatusBadge(selectedAppointment.status)}</div>
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Patient</Label>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {selectedAppointment.patient.user.firstName} {selectedAppointment.patient.user.lastName}
-                    </p>
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Healthcare Provider</Label>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {formatSimpleProviderName(selectedAppointment.provider.user.firstName, selectedAppointment.provider.user.lastName)}
-                    </p>
-                  </div>
-                </div>
-                
-                {/* Notes Section */}
-                {selectedAppointment.notes && (
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Appointment Notes</h4>
-                    <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-md">
-                      <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                        {selectedAppointment.notes}
+        {selectedAppointment && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <CardHeader>
+                <CardTitle>Appointment Details</CardTitle>
+                <CardDescription>
+                  Complete information about the appointment
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Appointment Title</Label>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedAppointment.title}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Type</Label>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedAppointment.type || 'General Consultation'}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Date & Start Time</Label>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">{new Date(selectedAppointment.startTime).toLocaleString()}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">End Time</Label>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">{new Date(selectedAppointment.endTime).toLocaleString()}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Duration</Label>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {Math.round((new Date(selectedAppointment.endTime).getTime() - new Date(selectedAppointment.startTime).getTime()) / (1000 * 60))} minutes
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Status</Label>
+                      <div>{getStatusBadge(selectedAppointment.status)}</div>
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Patient</Label>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {selectedAppointment.patient.user.firstName} {selectedAppointment.patient.user.lastName}
+                      </p>
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Healthcare Provider</Label>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {formatSimpleProviderName(selectedAppointment.provider.user.firstName, selectedAppointment.provider.user.lastName)}
                       </p>
                     </div>
                   </div>
-                )}
-                
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex justify-end">
-                  <Button variant="outline" onClick={() => setSelectedAppointment(null)}>
-                    Close
-                  </Button>
+                  
+                  {/* Notes Section */}
+                  {selectedAppointment.notes && (
+                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Appointment Notes</h4>
+                      <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-md">
+                        <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                          {selectedAppointment.notes}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex justify-end">
+                    <Button variant="outline" onClick={() => setSelectedAppointment(null)}>
+                      Close
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* New Appointment Modal */}
         {showNewAppointment && (

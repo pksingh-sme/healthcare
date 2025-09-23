@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyToken, hashPassword } from '@/lib/auth'
+import { validatePassword, isPasswordCompromised } from '@/lib/password-validation'
 
 // Make this route dynamic to prevent static generation issues
 export const dynamic = 'force-dynamic'
@@ -23,6 +24,29 @@ export async function POST(request: Request) {
     if (!payload) {
       return NextResponse.json(
         { error: 'Invalid or expired reset token' },
+        { status: 400 }
+      )
+    }
+
+    // Validate password according to HIPAA and NIST guidelines
+    const passwordValidation = await validatePassword(password, {
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      email: payload.email
+    })
+
+    if (!passwordValidation.isValid) {
+      return NextResponse.json(
+        { error: passwordValidation.errors.join(', ') },
+        { status: 400 }
+      )
+    }
+
+    // Check if password has been compromised
+    const isCompromised = await isPasswordCompromised(password)
+    if (isCompromised) {
+      return NextResponse.json(
+        { error: 'Password has been found in breach databases. Please choose a different password.' },
         { status: 400 }
       )
     }

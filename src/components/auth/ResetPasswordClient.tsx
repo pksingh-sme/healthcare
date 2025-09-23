@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { verifyToken } from '@/lib/auth'
+import PasswordStrengthMeter from '@/components/auth/PasswordStrengthMeter'
 
 export default function ResetPasswordClient() {
   const [password, setPassword] = useState('')
@@ -52,11 +53,6 @@ export default function ResetPasswordClient() {
     
     if (password !== confirmPassword) {
       setError('Passwords do not match')
-      return
-    }
-    
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
       return
     }
 
@@ -179,6 +175,7 @@ export default function ResetPasswordClient() {
                         className="pl-10 py-6 bg-white/50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-xl"
                       />
                     </div>
+                    <PasswordStrengthMeter password={password} />
                   </div>
 
                   <div className="space-y-2">

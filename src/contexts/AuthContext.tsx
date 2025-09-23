@@ -55,6 +55,9 @@ interface AuthContextType {
   refreshUser: () => Promise<void>
   loading: boolean
   error: string | null
+  // Add a new state to track if 2FA is required
+  twoFARequired: boolean
+  setTwoFARequired: (required: boolean) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -73,6 +76,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isClient, setIsClient] = useState(false)
+  // Add state to track if 2FA is required
+  const [twoFARequired, setTwoFARequired] = useState(false)
 
   // Set isClient to true when component mounts
   useEffect(() => {
@@ -136,15 +141,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { user: userData, token: authToken } = result.data
         setUser(userData)
         setToken(authToken)
+        setTwoFARequired(false) // Reset 2FA required state
         localStorage.setItem('token', authToken)
         return true
       } else {
-        setError(result.error || 'Login failed')
-        return false
+        // Check if 2FA is required
+        if (result.error === '2FA token required') {
+          setTwoFARequired(true)
+          setError(null) // Clear error since this is expected flow
+          return false
+        } else {
+          setError(result.error || 'Login failed')
+          setTwoFARequired(false) // Reset 2FA required state
+          return false
+        }
       }
     } catch (error) {
       console.error('Login error:', error)
       setError('Network error. Please try again.')
+      setTwoFARequired(false) // Reset 2FA required state
       return false
     } finally {
       setLoading(false)
@@ -199,6 +214,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setUser(null)
       setToken(null)
+      setTwoFARequired(false) // Reset 2FA required state
       localStorage.removeItem('token')
       
       // Redirect to login page after logout
@@ -223,6 +239,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshUser,
     loading,
     error,
+    twoFARequired,
+    setTwoFARequired,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

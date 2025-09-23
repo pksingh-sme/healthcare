@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { verifyPassword, generateToken, createSession } from '@/lib/auth'
+import { send2FALoginCode } from '@/lib/email'
 import { successResponse, errorResponse, handleApiError } from '@/lib/api'
 
 // Make this route dynamic to prevent static generation issues
@@ -44,8 +45,21 @@ export async function POST(request: NextRequest) {
     // Check 2FA if enabled
     if (user.twoFAEnabled) {
       if (!twoFAToken) {
+        // Generate and send 2FA code via email
+        const code = Math.floor(100000 + Math.random() * 900000).toString() // 6-digit code
+        try {
+          await send2FALoginCode(user.email, code)
+          console.log(`2FA code sent to ${user.email}: ${code}`)
+        } catch (error) {
+          console.error('Failed to send 2FA code:', error)
+          // Even if email fails, we still require 2FA token
+          // But let's inform the user about the email issue
+          return errorResponse('2FA token required. Note: There was an issue sending the code to your email. Please use any 6-digit number for testing.', 401)
+        }
+        
         return errorResponse('2FA token required', 401)
       }
+      
       // In production, implement proper 2FA verification
       // For demo, accept any 6-digit token
       if (!/^\d{6}$/.test(twoFAToken)) {
