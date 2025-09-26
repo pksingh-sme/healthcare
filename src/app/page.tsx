@@ -52,20 +52,20 @@ export default function Home() {
   // Healthcare-related images for the carousel
   const heroImages = [
     {
-      url: "./images/banners/banner1.png",
+      url: "./images/banners/banner1.jpg",
       alt: "Modern healthcare facility with advanced medical equipment"
     },
     {
-      url: "./images/banners/banner2.png",
-      alt: "Doctor using digital tablet for patient records"
-    },
-    {
-      url: "./images/banners/banner3.png",
+      url: "./images/banners/banner2.jpg",
       alt: "Healthcare professionals in a modern clinic"
     },
     {
-      url: "./images/banners/banner4.png",
+      url: "./images/banners/banner3.jpg",
       alt: "Patient receiving care in a medical facility"
+    },
+    {
+      url: "./images/banners/banner4.jpg",
+      alt: "Doctor using digital tablet for patient records"
     }
   ]
 
