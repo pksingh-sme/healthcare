@@ -1,0 +1,423 @@
+[1mdiff --git a/src/app/setup-password/SetupPasswordContent.tsx b/src/app/setup-password/SetupPasswordContent.tsx[m
+[1mnew file mode 100644[m
+[1mindex 0000000..2762f87[m
+[1m--- /dev/null[m
+[1m+++ b/src/app/setup-password/SetupPasswordContent.tsx[m
+[36m@@ -0,0 +1,201 @@[m
+[32m+[m[32m'use client'[m
+[32m+[m
+[32m+[m[32mimport { useState, useEffect } from 'react'[m
+[32m+[m[32mimport { useRouter, useSearchParams } from 'next/navigation'[m
+[32m+[m[32mimport { Button } from '@/components/ui/button'[m
+[32m+[m[32mimport { Input } from '@/components/ui/input'[m
+[32m+[m[32mimport { Label } from '@/components/ui/label'[m
+[32m+[m[32mimport { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'[m
+[32m+[m[32mimport PasswordStrengthMeter from '@/components/auth/PasswordStrengthMeter'[m
+[32m+[m[32mimport Link from 'next/link'[m
+[32m+[m[32mimport { AlertCircle, CheckCircle } from 'lucide-react'[m
+[32m+[m
+[32m+[m[32mexport default function SetupPasswordContent() {[m
+[32m+[m[32m  const router = useRouter()[m
+[32m+[m[32m  const searchParams = useSearchParams()[m
+[32m+[m[32m  const token = searchParams.get('token')[m
+[32m+[m[41m  [m
+[32m+[m[32m  const [password, setPassword] = useState('')[m
+[32m+[m[32m  const [confirmPassword, setConfirmPassword] = useState('')[m
+[32m+[m[32m  const [loading, setLoading] = useState(false)[m
+[32m+[m[32m  const [error, setError] = useState('')[m
+[32m+[m[32m  const [success, setSuccess] = useState(false)[m
+[32m+[m[32m  const [isValidToken, setIsValidToken] = useState<boolean | null>(null)[m
+[32m+[m
+[32m+[m[32m  // Check if token is valid[m
+[32m+[m[32m  useEffect(() => {[m
+[32m+[m[32m    if (!token) {[m
+[32m+[m[32m      setIsValidToken(false)[m
+[32m+[m[32m      return[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    // In a real app, you would verify the token with an API call[m
+[32m+[m[32m    // For now, we'll just assume it's valid[m
+[32m+[m[32m    setIsValidToken(true)[m
+[32m+[m[32m  }, [token])[m
+[32m+[m
+[32m+[m[32m  const handleSubmit = async (e: React.FormEvent) => {[m
+[32m+[m[32m    e.preventDefault()[m
+[32m+[m[41m    [m
+[32m+[m[32m    if (!token) {[m
+[32m+[m[32m      setError('Invalid or missing token')[m
+[32m+[m[32m      return[m
+[32m+[m[32m    }[m
+[32m+[m[41m    [m
+[32m+[m[32m    if (password !== confirmPassword) {[m
+[32m+[m[32m      setError('Passwords do not match')[m
+[32m+[m[32m      return[m
+[32m+[m[32m    }[m
+[32m+[m[41m    [m
+[32m+[m[32m    if (password.length < 8) {[m
+[32m+[m[32m      setError('Password must be at least 8 characters')[m
+[32m+[m[32m      return[m
+[32m+[m[32m    }[m
+[32m+[m[41m    [m
+[32m+[m[32m    try {[m
+[32m+[m[32m      setLoading(true)[m
+[32m+[m[32m      setError('')[m
+[32m+[m[41m      [m
+[32m+[m[32m      const response = await fetch('/api/auth/setup-password', {[m
+[32m+[m[32m        method: 'POST',[m
+[32m+[m[32m        headers: {[m
+[32m+[m[32m          'Content-Type': 'application/json',[m
+[32m+[m[32m        },[m
+[32m+[m[32m        body: JSON.stringify({ token, password }),[m
+[32m+[m[32m      })[m
+[32m+[m[41m      [m
+[32m+[m[32m      const result = await response.json()[m
+[32m+[m[41m      [m
+[32m+[m[32m      if (response.ok) {[m
+[32m+[m[32m        setSuccess(true)[m
+[32m+[m[32m        // Redirect to login after 3 seconds[m
+[32m+[m[32m        setTimeout(() => {[m
+[32m+[m[32m          router.push('/login')[m
+[32m+[m[32m        }, 3000)[m
+[32m+[m[32m      } else {[m
+[32m+[m[32m        setError(result.error || 'Failed to set up password')[m
+[32m+[m[32m      }[m
+[32m+[m[32m    } catch (err) {[m
+[32m+[m[32m      setError('An error occurred. Please try again.')[m
+[32m+[m[32m    } finally {[m
+[32m+[m[32m      setLoading(false)[m
+[32m+[m[32m    }[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  if (isValidToken === null) {[m
+[32m+[m[32m    return ([m
+[32m+[m[32m      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-teal-50 dark:from-gray-900 dark:to-gray-800">[m
+[32m+[m[32m        <div className="text-center">[m
+[32m+[m[32m          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>[m
+[32m+[m[32m          <p className="mt-4 text-gray-600 dark:text-gray-300">Verifying your link...</p>[m
+[32m+[m[32m        </div>[m
+[32m+[m[32m      </div>[m
+[32m+[m[32m    )[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  if (isValidToken === false || !token) {[m
+[32m+[m[32m    return ([m
+[32m+[m[32m      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-teal-50 dark:from-gray-900 dark:to-gray-800">[m
+[32m+[m[32m        <Card className="w-full max-w-md">[m
+[32m+[m[32m          <CardHeader>[m
+[32m+[m[32m            <CardTitle className="text-2xl font-bold text-center">Invalid Link</CardTitle>[m
+[32m+[m[32m            <CardDescription className="text-center">[m
+[32m+[m[32m              This password setup link is invalid or has expired.[m
+[32m+[m[32m            </CardDescription>[m
+[32m+[m[32m          </CardHeader>[m
+[32m+[m[32m          <CardContent>[m
+[32m+[m[32m            <div className="text-red-600 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">[m
+[32m+[m[32m              <AlertCircle className="h-4 w-4 inline mr-2" />[m
+[32m+[m[32m              The link you clicked is invalid or has expired. Please contact your administrator to send you a new link.[m
+[32m+[m[32m            </div>[m
+[32m+[m[32m            <div className="mt-6 text-center">[m
+[32m+[m[32m              <Link href="/login" className="text-blue-600 hover:underline">[m
+[32m+[m[32m                Back to Login[m
+[32m+[m[32m              </Link>[m
+[32m+[m[32m            </div>[m
+[32m+[m[32m          </CardContent>[m
+[32m+[m[32m        </Card>[m
+[32m+[m[32m      </div>[m
+[32m+[m[32m    )[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  if (success) {[m
+[32m+[m[32m    return ([m
+[32m+[m[32m      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-teal-50 dark:from-gray-900 dark:to-gray-800">[m
+[32m+[m[32m        <Card className="w-full max-w-md">[m
+[32m+[m[32m          <CardHeader>[m
+[32m+[m[32m            <CardTitle className="text-2xl font-bold text-center">Password Set Successfully!</CardTitle>[m
+[32m+[m[32m            <CardDescription className="text-center">[m
+[32m+[m[32m              Your password has been set up successfully.[m
+[32m+[m[32m            </CardDescription>[m
+[32m+[m[32m          </CardHeader>[m
+[32m+[m[32m          <CardContent>[m
+[32m+[m[32m            <div className="text-center">[m
+[32m+[m[32m              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />[m
+[32m+[m[32m              <p className="mb-4">You will be redirected to the login page shortly...</p>[m
+[32m+[m[32m              <Button asChild>[m
+[32m+[m[32m                <Link href="/login">Go to Login Now</Link>[m
+[32m+[m[32m              </Button>[m
+[32m+[m[32m            </div>[m
+[32m+[m[32m          </CardContent>[m
+[32m+[m[32m        </Card>[m
+[32m+[m[32m      </div>[m
+[32m+[m[32m    )[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  return ([m
+[32m+[m[32m    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-teal-50 dark:from-gray-900 dark:to-gray-800">[m
+[32m+[m[32m      <Card className="w-full max-w-md">[m
+[32m+[m[32m        <CardHeader>[m
+[32m+[m[32m          <CardTitle className="text-2xl font-bold text-center">Set Up Your Password</CardTitle>[m
+[32m+[m[32m          <CardDescription className="text-center">[m
+[32m+[m[32m            Create a strong password for your account[m
+[32m+[m[32m          </CardDescription>[m
+[32m+[m[32m        </CardHeader>[m
+[32m+[m[32m        <CardContent>[m
+[32m+[m[32m          <form onSubmit={handleSubmit} className="space-y-4">[m
+[32m+[m[32m            {error && ([m
+[32m+[m[32m              <div className="text-red-600 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">[m
+[32m+[m[32m                <AlertCircle className="h-4 w-4 inline mr-2" />[m
+[32m+[m[32m                {error}[m
+[32m+[m[32m              </div>[m
+[32m+[m[32m            )}[m
+[32m+[m[41m            [m
+[32m+[m[32m            <div className="space-y-2">[m
+[32m+[m[32m              <Label htmlFor="password">Password</Label>[m
+[32m+[m[32m              <Input[m
+[32m+[m[32m                id="password"[m
+[32m+[m[32m                type="password"[m
+[32m+[m[32m                value={password}[m
+[32m+[m[32m                onChange={(e) => setPassword(e.target.value)}[m
+[32m+[m[32m                required[m
+[32m+[m[32m                minLength={8}[m
+[32m+[m[32m              />[m
+[32m+[m[32m              <PasswordStrengthMeter password={password} />[m
+[32m+[m[32m            </div>[m
+[32m+[m[41m            [m
+[32m+[m[32m            <div className="space-y-2">[m
+[32m+[m[32m              <Label htmlFor="confirmPassword">Confirm Password</Label>[m
+[32m+[m[32m              <Input[m
+[32m+[m[32m                id="confirmPassword"[m
+[32m+[m[32m                type="password"[m
+[32m+[m[32m                value={confirmPassword}[m
+[32m+[m[32m                onChange={(e) => setConfirmPassword(e.target.value)}[m
+[32m+[m[32m                required[m
+[32m+[m[32m                minLength={8}[m
+[32m+[m[32m              />[m
+[32m+[m[32m            </div>[m
+[32m+[m[41m            [m
+[32m+[m[32m            <Button[m[41m [m
+[32m+[m[32m              type="submit"[m[41m [m
+[32m+[m[32m              className="w-full"[m[41m [m
+[32m+[m[32m              disabled={loading || !password || !confirmPassword}[m
+[32m+[m[32m            >[m
+[32m+[m[32m              {loading ? 'Setting up...' : 'Set Password'}[m
+[32m+[m[32m            </Button>[m
+[32m+[m[32m          </form>[m
+[32m+[m[32m        </CardContent>[m
+[32m+[m[32m      </Card>[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m  )[m
+[32m+[m[32m}[m
+\ No newline at end of file[m
+[1mdiff --git a/src/app/setup-password/page.tsx b/src/app/setup-password/page.tsx[m
+[1mindex d662d90..e33c296 100644[m
+[1m--- a/src/app/setup-password/page.tsx[m
+[1m+++ b/src/app/setup-password/page.tsx[m
+[36m@@ -10,192 +10,25 @@[m [mimport PasswordStrengthMeter from '@/components/auth/PasswordStrengthMeter'[m
+ import Link from 'next/link'[m
+ import { AlertCircle, CheckCircle } from 'lucide-react'[m
+ [m
+[31m-export default function SetupPasswordPage() {[m
+[31m-  const router = useRouter()[m
+[31m-  const searchParams = useSearchParams()[m
+[31m-  const token = searchParams.get('token')[m
+[31m-  [m
+[31m-  const [password, setPassword] = useState('')[m
+[31m-  const [confirmPassword, setConfirmPassword] = useState('')[m
+[31m-  const [loading, setLoading] = useState(false)[m
+[31m-  const [error, setError] = useState('')[m
+[31m-  const [success, setSuccess] = useState(false)[m
+[31m-  const [isValidToken, setIsValidToken] = useState<boolean | null>(null)[m
+[31m-[m
+[31m-  // Check if token is valid[m
+[31m-  useEffect(() => {[m
+[31m-    if (!token) {[m
+[31m-      setIsValidToken(false)[m
+[31m-      return[m
+[31m-    }[m
+[31m-[m
+[31m-    // In a real app, you would verify the token with an API call[m
+[31m-    // For now, we'll just assume it's valid[m
+[31m-    setIsValidToken(true)[m
+[31m-  }, [token])[m
+[32m+[m[32m// Force this page to be dynamic and not statically generated[m
+[32m+[m[32mexport const dynamic = 'force-dynamic'[m
+ [m
+[31m-  const handleSubmit = async (e: React.FormEvent) => {[m
+[31m-    e.preventDefault()[m
+[31m-    [m
+[31m-    if (!token) {[m
+[31m-      setError('Invalid or missing token')[m
+[31m-      return[m
+[31m-    }[m
+[31m-    [m
+[31m-    if (password !== confirmPassword) {[m
+[31m-      setError('Passwords do not match')[m
+[31m-      return[m
+[31m-    }[m
+[31m-    [m
+[31m-    if (password.length < 8) {[m
+[31m-      setError('Password must be at least 8 characters')[m
+[31m-      return[m
+[31m-    }[m
+[31m-    [m
+[31m-    try {[m
+[31m-      setLoading(true)[m
+[31m-      setError('')[m
+[31m-      [m
+[31m-      const response = await fetch('/api/auth/setup-password', {[m
+[31m-        method: 'POST',[m
+[31m-        headers: {[m
+[31m-          'Content-Type': 'application/json',[m
+[31m-        },[m
+[31m-        body: JSON.stringify({ token, password }),[m
+[31m-      })[m
+[31m-      [m
+[31m-      const result = await response.json()[m
+[31m-      [m
+[31m-      if (response.ok) {[m
+[31m-        setSuccess(true)[m
+[31m-        // Redirect to login after 3 seconds[m
+[31m-        setTimeout(() => {[m
+[31m-          router.push('/login')[m
+[31m-        }, 3000)[m
+[31m-      } else {[m
+[31m-        setError(result.error || 'Failed to set up password')[m
+[31m-      }[m
+[31m-    } catch (err) {[m
+[31m-      setError('An error occurred. Please try again.')[m
+[31m-    } finally {[m
+[31m-      setLoading(false)[m
+[31m-    }[m
+[31m-  }[m
+[31m-[m
+[31m-  if (isValidToken === null) {[m
+[31m-    return ([m
+[31m-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-teal-50 dark:from-gray-900 dark:to-gray-800">[m
+[31m-        <div className="text-center">[m
+[31m-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>[m
+[31m-          <p className="mt-4 text-gray-600 dark:text-gray-300">Verifying your link...</p>[m
+[31m-        </div>[m
+[31m-      </div>[m
+[31m-    )[m
+[31m-  }[m
+[31m-[m
+[31m-  if (isValidToken === false || !token) {[m
+[31m-    return ([m
+[31m-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-teal-50 dark:from-gray-900 dark:to-gray-800">[m
+[31m-        <Card className="w-full max-w-md">[m
+[31m-          <CardHeader>[m
+[31m-            <CardTitle className="text-2xl font-bold text-center">Invalid Link</CardTitle>[m
+[31m-            <CardDescription className="text-center">[m
+[31m-              This password setup link is invalid or has expired.[m
+[31m-            </CardDescription>[m
+[31m-          </CardHeader>[m
+[31m-          <CardContent>[m
+[31m-            <div className="text-red-600 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">[m
+[31m-              <AlertCircle className="h-4 w-4 inline mr-2" />[m
+[31m-              The link you clicked is invalid or has expired. Please contact your administrator to send you a new link.[m
+[31m-            </div>[m
+[31m-            <div className="mt-6 text-center">[m
+[31m-              <Link href="/login" className="text-blue-600 hover:underline">[m
+[31m-                Back to Login[m
+[31m-              </Link>[m
+[31m-            </div>[m
+[31m-          </CardContent>[m
+[31m-        </Card>[m
+[31m-      </div>[m
+[31m-    )[m
+[31m-  }[m
+[31m-[m
+[31m-  if (success) {[m
+[31m-    return ([m
+[31m-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-teal-50 dark:from-gray-900 dark:to-gray-800">[m
+[31m-        <Card className="w-full max-w-md">[m
+[31m-          <CardHeader>[m
+[31m-            <CardTitle className="text-2xl font-bold text-center">Password Set Successfully!</CardTitle>[m
+[31m-            <CardDescription className="text-center">[m
+[31m-              Your password has been set up successfully.[m
+[31m-            </CardDescription>[m
+[31m-          </CardHeader>[m
+[31m-          <CardContent>[m
+[31m-            <div className="text-center">[m
+[31m-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />[m
+[31m-              <p className="mb-4">You will be redirected to the login page shortly...</p>[m
+[31m-              <Button asChild>[m
+[31m-                <Link href="/login">Go to Login Now</Link>[m
+[31m-              </Button>[m
+[31m-            </div>[m
+[31m-          </CardContent>[m
+[31m-        </Card>[m
+[31m-      </div>[m
+[31m-    )[m
+[31m-  }[m
+[32m+[m[32mimport { Suspense } from 'react'[m
+[32m+[m[32mimport SetupPasswordContent from './SetupPasswordContent'[m
+ [m
+[32m+[m[32mexport default function SetupPasswordPage() {[m
+   return ([m
+[31m-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-teal-50 dark:from-gray-900 dark:to-gray-800">[m
+[31m-      <Card className="w-full max-w-md">[m
+[31m-        <CardHeader>[m
+[31m-          <CardTitle className="text-2xl font-bold text-center">Set Up Your Password</CardTitle>[m
+[31m-          <CardDescription className="text-center">[m
+[31m-            Create a strong password for your account[m
+[31m-          </CardDescription>[m
+[31m-        </CardHeader>[m
+[31m-        <CardContent>[m
+[31m-          <form onSubmit={handleSubmit} className="space-y-4">[m
+[31m-            {error && ([m
+[31m-              <div className="text-red-600 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">[m
+[31m-                <AlertCircle className="h-4 w-4 inline mr-2" />[m
+[31m-                {error}[m
+[31m-              </div>[m
+[31m-            )}[m
+[31m-            [m
+[31m-            <div className="space-y-2">[m
+[31m-              <Label htmlFor="password">Password</Label>[m
+[31m-              <Input[m
+[31m-                id="password"[m
+[31m-                type="password"[m
+[31m-                value={password}[m
+[31m-                onChange={(e) => setPassword(e.target.value)}[m
+[31m-                required[m
+[31m-                minLength={8}[m
+[31m-              />[m
+[31m-              <PasswordStrengthMeter password={password} />[m
+[31m-            </div>[m
+[31m-            [m
+[31m-            <div className="space-y-2">[m
+[31m-              <Label htmlFor="confirmPassword">Confirm Password</Label>[m
+[31m-              <Input[m
+[31m-                id="confirmPassword"[m
+[31m-                type="password"[m
+[31m-                value={confirmPassword}[m
+[31m-                onChange={(e) => setConfirmPassword(e.target.value)}[m
+[31m-                required[m
+[31m-                minLength={8}[m
+[31m-              />[m
+[31m-            </div>[m
+[31m-            [m
+[31m-            <Button [m
+[31m-              type="submit" [m
+[31m-              className="w-full" [m
+[31m-              disabled={loading || !password || !confirmPassword}[m
+[31m-            >[m
+[31m-              {loading ? 'Setting up...' : 'Set Password'}[m
+[31m-            </Button>[m
+[31m-          </form>[m
+[31m-        </CardContent>[m
+[31m-      </Card>[m
+[32m+[m[32m    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 dark:from-gray-900 dark:to-gray-800">[m
+[32m+[m[32m      <Suspense fallback={[m
+[32m+[m[32m        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-teal-50 dark:from-gray-900 dark:to-gray-800">[m
+[32m+[m[32m          <div className="text-center">[m
+[32m+[m[32m            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>[m
+[32m+[m[32m            <p className="mt-4 text-gray-600 dark:text-gray-300">Loading...</p>[m
+[32m+[m[32m          </div>[m
+[32m+[m[32m        </div>[m
+[32m+[m[32m      }>[m
+[32m+[m[32m        <SetupPasswordContent />[m
+[32m+[m[32m      </Suspense>[m
+     </div>[m
+   )[m
+[31m-}[m
+\ No newline at end of file[m
+[32m+[m[32m}[m
