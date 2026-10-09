@@ -56,8 +56,8 @@ logs
 *.temp
 
 # Uploads (these should be stored elsewhere in production)
-#public/uploads/*
-#public/uploads/.gitkeep
+public/uploads/*
+!public/uploads/.gitkeep
 
 # Markdown files
 *.md
