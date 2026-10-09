@@ -5,7 +5,8 @@ import { verifyPassword, generateToken, createSession } from '@/lib/auth'
 import { send2FALoginCode } from '@/lib/email'
 import { successResponse, errorResponse, handleApiError } from '@/lib/api'
 
-// Make this route dynamic to prevent static generation issues
+// Prisma and nodemailer require the Node.js runtime; explicitly avoid Edge bundling.
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const LoginSchema = z.object({
