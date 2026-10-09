@@ -20,10 +20,10 @@ async function main() {
   console.log('Existing data cleared')
 
   // Create admin user
-  const adminPassword = await bcrypt.hash('admin123', 12)
+  const adminPassword = await bcrypt.hash('Ce123!@#', 12)
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@clinicease.ai',
+      email: 'pksingh.sme@gmail.com',
       password: adminPassword,
       role: Role.ADMIN,
       firstName: 'Admin',
