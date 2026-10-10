@@ -152,6 +152,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Validate relation IDs before running the conflict query. The appointment
+    // table references Patient/Provider/User records, not their user IDs.
+    const [patient, provider, creator] = await Promise.all([
+      prisma.patient.findUnique({ where: { id: patientId }, select: { id: true } }),
+      prisma.provider.findUnique({ where: { id: providerId }, select: { id: true } }),
+      prisma.user.findUnique({ where: { id: user.id }, select: { id: true } }),
+    ])
+
+    if (!patient || !provider || !creator) {
+      return NextResponse.json(
+        { error: 'Invalid patient, provider, or authenticated user reference' },
+        { status: 400 }
+      )
+    }
 
     // Check for scheduling conflicts
     const appointmentDateTime = new Date(dateTime)
