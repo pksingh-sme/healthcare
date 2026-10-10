@@ -136,12 +136,14 @@ export default function AppointmentsPage() {
         const data = await response.json()
         
         // Transform the data to match our interface
-        const transformedProviders = data.data?.map((user: any) => ({
-          id: user.provider?.id || user.id, // Use provider.id if available, fallback to user.id
-          firstName: user.firstName,
-          lastName: user.lastName,
-          provider: user.provider
-        })) || []
+        const transformedProviders = data.data
+          ?.filter((user: any) => user.provider?.id)
+          .map((user: any) => ({
+            id: user.provider.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            provider: user.provider,
+          })) || []
         
         setProviders(transformedProviders)
       } else {
